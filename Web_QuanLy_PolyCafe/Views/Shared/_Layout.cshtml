@@ -1,0 +1,4239 @@
+﻿@* <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Web_QuanLy_PolyCafe</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Web_QuanLy_PolyCafe.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Web_QuanLy_PolyCafe</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Web_QuanLy_PolyCafe - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> *@
+@* <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PolyCafe</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Web_QuanLy_PolyCafe.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --amber: #f59e0b;
+            --amber2: #d97706;
+            --green: #10b981;
+            --red: #ef4444;
+            --sb: #1e293b;
+            --sb2: #273548;
+            --bg: #f1f5f9;
+            --cream: #fef3c7;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+        }
+
+        /* ===== TOPBAR ===== */
+        .pc-topbar {
+            height: 54px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .pc-logo-box {
+            width: 34px;
+            height: 34px;
+            background: var(--amber);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .pc-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .pc-tag {
+            background: var(--cream);
+            color: var(--amber2);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pc-clock {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-staff {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        .pc-bill-btn {
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background .15s;
+            position: relative;
+        }
+
+            .pc-bill-btn:hover {
+                background: #334155;
+            }
+
+        .pc-bill-badge {
+            background: var(--amber);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        /* ===== APP SHELL ===== */
+        .pc-shell {
+            display: flex;
+            height: calc(100vh - 54px);
+            margin-top: 54px;
+            overflow: hidden;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .pc-main {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== BILL SIDEBAR ===== */
+        .pc-sidebar {
+            width: 285px;
+            background: var(--sb);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width .35s cubic-bezier(.4,0,.2,1);
+        }
+
+            .pc-sidebar.hidden {
+                width: 0;
+            }
+
+        .pc-sb-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 285px;
+        }
+
+        .pc-sb-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-sb-title {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .pc-sb-num {
+            background: var(--amber);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+
+        .pc-order-scroll {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 0;
+        }
+
+            .pc-order-scroll::-webkit-scrollbar {
+                width: 3px;
+            }
+
+            .pc-order-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.12);
+                border-radius: 2px;
+            }
+
+        .pc-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255,255,255,.18);
+            font-size: 12px;
+            padding: 40px 0;
+            flex: 1;
+        }
+
+            .pc-empty i {
+                font-size: 32px;
+                opacity: .15;
+            }
+
+        .pc-oi {
+            background: var(--sb2);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 9px;
+            padding: 9px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pcUp .2s ease;
+        }
+        @@keyframes pcUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .pc-oi:hover {
+            border-color: rgba(245,158,11,.3);
+        }
+
+        .pc-oi-em {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .pc-oi-name {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pc-oi-sub {
+            color: rgba(255,255,255,.35);
+            font-size: 10px;
+        }
+
+        .pc-oi-price {
+            color: var(--amber);
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .pc-qbtn {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: transparent;
+            color: rgba(255,255,255,.6);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .1s;
+        }
+
+            .pc-qbtn:hover {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #fff;
+            }
+
+        .pc-qnum {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .pc-del {
+            background: transparent;
+            border: none;
+            color: rgba(255,80,80,.4);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            transition: color .1s;
+        }
+
+            .pc-del:hover {
+                color: var(--red);
+            }
+
+        /* ===== SIDEBAR FOOTER ===== */
+        .pc-sb-foot {
+            padding: 11px 13px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-coup-in {
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 7px;
+            padding: 7px 9px;
+            color: #fff;
+            font-size: 11px;
+            outline: none;
+            font-family: 'Nunito', sans-serif;
+            flex: 1;
+        }
+
+            .pc-coup-in::placeholder {
+                color: rgba(255,255,255,.22);
+            }
+
+            .pc-coup-in:focus {
+                border-color: var(--amber);
+            }
+
+        .pc-coup-btn {
+            background: transparent;
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            white-space: nowrap;
+        }
+
+            .pc-coup-btn:hover {
+                background: var(--amber);
+                color: #fff;
+            }
+
+        .pc-row-sum {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .pc-lbl {
+            color: rgba(255,255,255,.38);
+            font-size: 11px;
+        }
+
+        .pc-val {
+            color: rgba(255,255,255,.72);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pc-val-disc {
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .pc-sep {
+            border: none;
+            border-top: 1px dashed rgba(255,255,255,.1);
+            margin: 5px 0;
+        }
+
+        .pc-grand-lbl {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .pc-grand-val {
+            font-family: 'Playfair Display', serif;
+            color: var(--amber);
+            font-size: 20px;
+        }
+
+        .pc-btn-pay {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px;
+            transition: background .13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+        }
+
+            .pc-btn-pay:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-cancel {
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.22);
+            border-radius: 9px;
+            color: #f87171;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+            .pc-btn-cancel:hover {
+                background: rgba(239,68,68,.2);
+            }
+
+        /* ===== TOAST ===== */
+        .pc-toast-wrap {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .pc-toast-box {
+            background: #1e293b;
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            white-space: nowrap;
+            opacity: 0;
+            transition: all .25s;
+            transform: translateY(8px);
+        }
+
+        .pc-toast-wrap.show .pc-toast-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== MODALS ===== */
+        .modal-content {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 16px 50px rgba(0,0,0,.16);
+        }
+
+        .pc-m-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 19px;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .pc-m-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--amber2);
+            text-align: center;
+        }
+
+        .pc-pay-opt {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            transition: all .13s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+            .pc-pay-opt:hover {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+            .pc-pay-opt.active {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-pay-icon {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .pc-btn-confirm {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 20px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background .13s;
+        }
+
+            .pc-btn-confirm:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-back {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 9px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 16px;
+        }
+
+        .pc-var-item {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: all .13s;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .pc-var-item:hover, .pc-var-item.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-var-def {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            background: #fff;
+            width: 100%;
+            text-align: left;
+            transition: all .13s;
+        }
+
+            .pc-var-def:hover, .pc-var-def.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-ok-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #fff;
+            margin: 0 auto;
+        }
+    </style>
+    @await RenderSectionAsync("HeadStyles", required: false)
+</head>
+<body>
+
+    <!-- ===== TOPBAR ===== -->
+    <div class="pc-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-logo-box">☕</div>
+            <span class="pc-brand">PolyCafe</span>
+            <span class="pc-tag">POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-clock">
+                <i class="fa fa-clock" style="color:var(--amber)"></i>
+                <span id="pc-clock">--:--:--</span>
+            </div>
+            <div class="pc-staff">
+                <span class="pc-dot"></span>
+                <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
+                Nhân viên
+            </div>
+            <button class="pc-bill-btn" onclick="pcToggleBill()">
+                <i class="fa fa-receipt"></i>Hóa đơn
+                <span class="pc-bill-badge" id="pc-bill-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== APP SHELL ===== -->
+    <div class="pc-shell">
+
+        <!-- MAIN: nội dung từng trang -->
+        <div class="pc-main" id="pc-main">
+            @RenderBody()
+        </div>
+
+        <!-- SIDEBAR: hóa đơn cố định -->
+        <div class="pc-sidebar" id="pc-sidebar">
+            <div class="pc-sb-inner">
+                <div class="pc-sb-head d-flex justify-content-between align-items-center">
+                    <span class="pc-sb-title">
+                        <i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Hóa Đơn
+                    </span>
+                    <span class="pc-sb-num" id="pc-onum">#001</span>
+                </div>
+
+                <div class="pc-order-scroll" id="pc-olist">
+                    <div class="pc-empty">
+                        <i class="fa fa-cart-shopping"></i>Chưa có món nào
+                    </div>
+                </div>
+
+                <div class="pc-sb-foot">
+                    <div class="d-flex gap-2 mb-2">
+                        <input class="pc-coup-in" id="pc-coup" placeholder="Nhập mã khuyến mãi..." />
+                        <button class="pc-coup-btn" onclick="pcApCoup()">
+                            <i class="fa fa-tag me-1"></i>Áp
+                        </button>
+                    </div>
+                    <div class="pc-row-sum">
+                        <span class="pc-lbl">Tạm tính</span>
+                        <span class="pc-val" id="pc-sub">0đ</span>
+                    </div>
+                    <div class="pc-row-sum" id="pc-drow" style="display:none">
+                        <span class="pc-lbl">
+                            <i class="fa fa-percent me-1" style="color:var(--green)"></i>
+                            <span id="pc-dlbl">Giảm giá</span>
+                        </span>
+                        <span class="pc-val-disc" id="pc-dval">−0đ</span>
+                    </div>
+                    <hr class="pc-sep" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="pc-grand-lbl">Tổng tiền</span>
+                        <span class="pc-grand-val" id="pc-tot">0đ</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="pc-btn-pay flex-fill" onclick="pcOpenPay()">
+                            <i class="fa fa-credit-card"></i> Thanh Toán
+                        </button>
+                        <button class="pc-btn-cancel" onclick="pcClrAll()">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="pc-toast-wrap" id="pc-toast-wrap">
+        <div class="pc-toast-box" id="pc-toast-box"></div>
+    </div>
+
+    <!-- ===== MODAL: CHỌN VARIANT ===== -->
+    <div class="modal fade" id="pcVarModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1">
+                    <i class="fa fa-sliders me-2" style="color:var(--amber)"></i>
+                    <span id="pc-vm-name"></span>
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">
+                    Giá gốc: <span id="pc-vm-base" style="color:var(--amber2);font-weight:800"></span>
+                </div>
+                <div id="pc-vm-list" class="d-flex flex-column gap-2 mb-3"></div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal">
+                        <i class="fa fa-arrow-left me-1"></i>Quay lại
+                    </button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmVar()">
+                        <i class="fa fa-plus me-1"></i>Thêm vào đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: THANH TOÁN ===== -->
+    <div class="modal fade" id="pcPayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1">
+                    <i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Thanh toán
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Chọn phương thức thanh toán</div>
+                <div class="pc-m-amount mb-3" id="pc-ma">0đ</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <div class="pc-pay-opt active" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-money-bill-wave" style="color:#22c55e"></i></div>
+                            Tiền mặt
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pc-pay-opt" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-qrcode" style="color:#3b82f6"></i></div>
+                            Chuyển khoản
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pc-pay-opt" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-gift" style="color:#f59e0b"></i></div>
+                            Voucher
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal">
+                        <i class="fa fa-arrow-left me-1"></i>Quay lại
+                    </button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmPay()">
+                        <i class="fa fa-check me-1"></i>Xác nhận thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: THÀNH CÔNG ===== -->
+    <div class="modal fade" id="pcOkModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content p-4 text-center">
+                <div class="pc-ok-icon mb-3"><i class="fa fa-check"></i></div>
+                <div class="pc-m-title mb-1">Thanh toán thành công!</div>
+                <div class="text-muted mb-1" style="font-size:12px;">Mã đơn hàng</div>
+                <div style="font-size:16px;font-weight:800;color:var(--amber2)" id="pc-ok-id"></div>
+                <div class="text-muted mt-1 mb-3" style="font-size:12px;">
+                    Tổng: <span id="pc-ok-tot" style="color:var(--green);font-weight:700"></span>
+                </div>
+                <button class="pc-btn-confirm w-100 justify-content-center" onclick="pcNewOrder()">
+                    <i class="fa fa-plus me-1"></i>Đơn mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // =====================================================================
+        // POLYCAFE LAYOUT - CART & BILL LOGIC (dùng chung toàn layout)
+        // Các trang con chỉ cần gọi: pcAddToCart(id, name, price, variantId, variantName, bg, emoji)
+        // =====================================================================
+
+        let pcCart = {};
+        let pcDiscount = 0, pcDiscType = '', pcDiscVal = 0, pcVoucherCode = '';
+        let pcOrderCount = 1, pcBillVisible = true;
+        let pcPendingDrink = null, pcSelVarId = null, pcSelVarExtra = 0, pcSelVarName = '';
+
+        const _pcVarModal = new bootstrap.Modal(document.getElementById('pcVarModal'));
+        const _pcPayModal = new bootstrap.Modal(document.getElementById('pcPayModal'));
+        const _pcOkModal  = new bootstrap.Modal(document.getElementById('pcOkModal'));
+
+        // Gọi từ trang con để mở modal chọn variant hoặc thêm thẳng vào giỏ
+        function pcCardClick(id, name, price, variants, bg, emoji) {
+            if (!pcBillVisible) {
+                pcBillVisible = true;
+                document.getElementById('pc-sidebar').classList.remove('hidden');
+            }
+            if (variants && variants.length > 0) {
+                pcOpenVarModal({ id, name, price, variants, bg, emoji });
+            } else {
+                pcAddToCart(id, name, price, null, '', bg, emoji);
+            }
+        }
+
+        function pcOpenVarModal(drink) {
+            pcPendingDrink = drink;
+            pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            document.getElementById('pc-vm-name').textContent = drink.name;
+            document.getElementById('pc-vm-base').textContent = drink.price.toLocaleString('vi') + 'đ';
+
+            const list = document.getElementById('pc-vm-list');
+            list.innerHTML = '';
+
+            const def = document.createElement('button');
+            def.className = 'pc-var-def';
+            def.innerHTML = `<i class="fa fa-circle-dot me-2" style="color:#94a3b8"></i>Mặc định — <b>${drink.price.toLocaleString('vi')}đ</b>`;
+            def.onclick = () => {
+                list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel'));
+                def.classList.add('sel');
+                pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            };
+            list.appendChild(def);
+
+            drink.variants.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'pc-var-item';
+                el.innerHTML = `<span>${v.name}</span><span style="color:var(--amber2);font-weight:800">+${v.extra.toLocaleString('vi')}đ → ${(drink.price+v.extra).toLocaleString('vi')}đ</span>`;
+                el.onclick = () => {
+                    list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel'));
+                    el.classList.add('sel');
+                    pcSelVarId = v.id; pcSelVarExtra = v.extra; pcSelVarName = v.name;
+                };
+                list.appendChild(el);
+            });
+            _pcVarModal.show();
+        }
+
+        function pcCfmVar() {
+            if (!pcPendingDrink) return;
+            pcAddToCart(pcPendingDrink.id, pcPendingDrink.name, pcPendingDrink.price + pcSelVarExtra,
+                        pcSelVarId, pcSelVarName, pcPendingDrink.bg, pcPendingDrink.emoji);
+            _pcVarModal.hide();
+            pcPendingDrink = null;
+        }
+
+        function pcAddToCart(id, name, price, varId, varName, bg, emoji) {
+            const key = id + (varId || '');
+            if (!pcCart[key]) pcCart[key] = { id, name, price, varId, varName, bg: bg||'#fef3c7', emoji: emoji||'☕', qty: 0 };
+            pcCart[key].qty++;
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            pcToast('<i class="fa fa-check me-1"></i>' + name + (varName ? ` (${varName})` : ''));
+            // Notify page để cập nhật badge sản phẩm
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcChgQty(key, d) {
+            if (!pcCart[key]) return;
+            pcCart[key].qty += d;
+            if (pcCart[key].qty <= 0) delete pcCart[key];
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(pcCart[key]?.id);
+        }
+
+        function pcDelItem(key) {
+            const id = pcCart[key]?.id;
+            delete pcCart[key];
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcRenderCart() {
+            const items = Object.entries(pcCart);
+            const l = document.getElementById('pc-olist');
+            if (!items.length) {
+                l.innerHTML = '<div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>';
+                pcUpdTotal(); return;
+            }
+            l.innerHTML = items.map(([key, i]) => `
+                <div class="pc-oi">
+                    <div class="pc-oi-em" style="background:${i.bg}">${i.emoji}</div>
+                    <div class="flex-fill" style="min-width:0">
+                        <div class="pc-oi-name">${i.name}</div>
+                        ${i.varName ? `<div class="pc-oi-sub">${i.varName}</div>` : ''}
+                        <div class="pc-oi-price">${(i.price*i.qty).toLocaleString('vi')}đ</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                        <span class="pc-qnum">${i.qty}</span>
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <button class="pc-del" onclick="pcDelItem('${key}')"><i class="fa fa-xmark"></i></button>
+                </div>`).join('');
+            pcUpdTotal();
+        }
+
+        function pcUpdTotal() {
+            const s = Object.values(pcCart).reduce((a,i) => a + i.price*i.qty, 0);
+            document.getElementById('pc-sub').textContent = s.toLocaleString('vi') + 'đ';
+            document.getElementById('pc-tot').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+        }
+
+        function pcUpdBillBadge() {
+            const t = Object.values(pcCart).reduce((a,i) => a+i.qty, 0);
+            const b = document.getElementById('pc-bill-badge');
+            t > 0 ? (b.style.display='flex', b.textContent=t) : (b.style.display='none');
+        }
+
+        function pcApCoup() {
+            const c = document.getElementById('pc-coup').value.trim();
+            if (!c) { pcToast('❌ Nhập mã khuyến mãi'); return; }
+            fetch(`/Order/CheckVoucher?code=${encodeURIComponent(c)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) {
+                        pcVoucherCode = c; pcDiscType = data.discountType; pcDiscVal = data.discountValue;
+                        pcRecalcDiscount(); pcToast('🎉 ' + data.message);
+                    } else {
+                        pcDiscount = 0; pcVoucherCode = '';
+                        document.getElementById('pc-drow').style.display = 'none';
+                        pcUpdTotal(); pcToast('❌ ' + data.message);
+                    }
+                });
+        }
+
+        function pcRecalcDiscount() {
+            if (!pcVoucherCode) return;
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            pcDiscount = pcDiscType === 'percent' ? Math.round(s * pcDiscVal / 100) : pcDiscVal;
+            document.getElementById('pc-drow').style.display = 'flex';
+            document.getElementById('pc-dlbl').textContent = pcDiscType === 'percent' ? `Giảm ${pcDiscVal}%` : 'Giảm giá';
+            document.getElementById('pc-dval').textContent = '−' + pcDiscount.toLocaleString('vi') + 'đ';
+            pcUpdTotal();
+        }
+
+        function pcClrAll() {
+            pcCart = {}; pcDiscount = 0; pcVoucherCode = ''; pcDiscType = ''; pcDiscVal = 0;
+            document.getElementById('pc-coup').value = '';
+            document.getElementById('pc-drow').style.display = 'none';
+            pcRenderCart(); pcUpdBillBadge();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(null);
+        }
+
+        function pcToggleBill() {
+            pcBillVisible = !pcBillVisible;
+            document.getElementById('pc-sidebar').classList.toggle('hidden', !pcBillVisible);
+        }
+
+        function pcOpenPay() {
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            if (!s) { pcToast('<i class="fa fa-triangle-exclamation me-1"></i>Chưa có món'); return; }
+            document.getElementById('pc-ma').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+            _pcPayModal.show();
+        }
+
+        function pcSelPay(el) {
+            document.querySelectorAll('.pc-pay-opt').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function pcCfmPay() {
+            _pcPayModal.hide();
+            const items = Object.values(pcCart).map(i => ({ drinkId: i.id, variantId: i.varId||null, quantity: i.qty }));
+            fetch('/Order/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, voucherCode: pcVoucherCode || null })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) pcShowOk(d.orderId, d.total);
+                else pcToast('❌ ' + (d.message || 'Lỗi'));
+            })
+            .catch(() => {
+                const total = Math.max(0, Object.values(pcCart).reduce((a,i)=>a+i.price*i.qty,0) - pcDiscount);
+                pcShowOk('ORD' + Date.now(), total);
+            });
+        }
+
+        function pcShowOk(id, total) {
+            pcOrderCount++;
+            document.getElementById('pc-onum').textContent = '#' + String(pcOrderCount).padStart(3,'0');
+            document.getElementById('pc-ok-id').textContent = id;
+            document.getElementById('pc-ok-tot').textContent = (typeof total === 'number' ? total : 0).toLocaleString('vi') + 'đ';
+            _pcOkModal.show();
+        }
+
+        function pcNewOrder() { _pcOkModal.hide(); pcClrAll(); }
+
+        let _pcToastTmr;
+        function pcToast(msg) {
+            const w = document.getElementById('pc-toast-wrap');
+            document.getElementById('pc-toast-box').innerHTML = msg;
+            w.classList.add('show');
+            clearTimeout(_pcToastTmr);
+            _pcToastTmr = setTimeout(() => w.classList.remove('show'), 2200);
+        }
+
+        // Clock
+        setInterval(() => {
+            document.getElementById('pc-clock').textContent =
+                new Date().toLocaleTimeString('vi', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }, 1000);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> *@
+@* <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PolyCafe</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Web_QuanLy_PolyCafe.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --amber: #f59e0b;
+            --amber2: #d97706;
+            --green: #10b981;
+            --red: #ef4444;
+            --sb: #1e293b;
+            --sb2: #273548;
+            --bg: #f1f5f9;
+            --cream: #fef3c7;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+        }
+
+        /* ===== TOPBAR ===== */
+        .pc-topbar {
+            height: 54px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .pc-logo-box {
+            width: 34px;
+            height: 34px;
+            background: var(--amber);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .pc-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .pc-tag {
+            background: var(--cream);
+            color: var(--amber2);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pc-clock {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-staff {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        .pc-bill-btn {
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background .15s;
+            position: relative;
+        }
+
+            .pc-bill-btn:hover {
+                background: #334155;
+            }
+
+        .pc-bill-badge {
+            background: var(--amber);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        /* ===== APP SHELL ===== */
+        .pc-shell {
+            display: flex;
+            height: calc(100vh - 54px);
+            margin-top: 54px;
+            overflow: hidden;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .pc-main {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== BILL SIDEBAR ===== */
+        .pc-sidebar {
+            width: 285px;
+            background: var(--sb);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width .35s cubic-bezier(.4,0,.2,1);
+        }
+
+            .pc-sidebar.hidden {
+                width: 0;
+            }
+
+        .pc-sb-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 285px;
+        }
+
+        .pc-sb-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-sb-title {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .pc-sb-num {
+            background: var(--amber);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+
+        .pc-order-scroll {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 0;
+        }
+
+            .pc-order-scroll::-webkit-scrollbar {
+                width: 3px;
+            }
+
+            .pc-order-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.12);
+                border-radius: 2px;
+            }
+
+        .pc-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255,255,255,.18);
+            font-size: 12px;
+            padding: 40px 0;
+            flex: 1;
+        }
+
+            .pc-empty i {
+                font-size: 32px;
+                opacity: .15;
+            }
+
+        .pc-oi {
+            background: var(--sb2);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 9px;
+            padding: 9px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pcUp .2s ease;
+        }
+        @@keyframes pcUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .pc-oi:hover {
+            border-color: rgba(245,158,11,.3);
+        }
+
+        .pc-oi-em {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+            .pc-oi-em img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                border-radius: 8px;
+            }
+
+        .pc-oi-name {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pc-oi-sub {
+            color: rgba(255,255,255,.35);
+            font-size: 10px;
+        }
+
+        .pc-oi-price {
+            color: var(--amber);
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .pc-qbtn {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: transparent;
+            color: rgba(255,255,255,.6);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .1s;
+        }
+
+            .pc-qbtn:hover {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #fff;
+            }
+
+        .pc-qnum {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .pc-del {
+            background: transparent;
+            border: none;
+            color: rgba(255,80,80,.4);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            transition: color .1s;
+        }
+
+            .pc-del:hover {
+                color: var(--red);
+            }
+
+        /* ===== SIDEBAR FOOTER ===== */
+        .pc-sb-foot {
+            padding: 11px 13px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-coup-in {
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 7px;
+            padding: 7px 9px;
+            color: #fff;
+            font-size: 11px;
+            outline: none;
+            font-family: 'Nunito', sans-serif;
+            flex: 1;
+        }
+
+            .pc-coup-in::placeholder {
+                color: rgba(255,255,255,.22);
+            }
+
+            .pc-coup-in:focus {
+                border-color: var(--amber);
+            }
+
+        .pc-coup-btn {
+            background: transparent;
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            white-space: nowrap;
+        }
+
+            .pc-coup-btn:hover {
+                background: var(--amber);
+                color: #fff;
+            }
+
+        .pc-row-sum {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .pc-lbl {
+            color: rgba(255,255,255,.38);
+            font-size: 11px;
+        }
+
+        .pc-val {
+            color: rgba(255,255,255,.72);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pc-val-disc {
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .pc-sep {
+            border: none;
+            border-top: 1px dashed rgba(255,255,255,.1);
+            margin: 5px 0;
+        }
+
+        .pc-grand-lbl {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .pc-grand-val {
+            font-family: 'Playfair Display', serif;
+            color: var(--amber);
+            font-size: 20px;
+        }
+
+        .pc-btn-pay {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px;
+            transition: background .13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+        }
+
+            .pc-btn-pay:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-cancel {
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.22);
+            border-radius: 9px;
+            color: #f87171;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+            .pc-btn-cancel:hover {
+                background: rgba(239,68,68,.2);
+            }
+
+        /* ===== TOAST ===== */
+        .pc-toast-wrap {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .pc-toast-box {
+            background: #1e293b;
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            white-space: nowrap;
+            opacity: 0;
+            transition: all .25s;
+            transform: translateY(8px);
+        }
+
+        .pc-toast-wrap.show .pc-toast-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== MODALS ===== */
+        .modal-content {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 16px 50px rgba(0,0,0,.16);
+        }
+
+        .pc-m-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 19px;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .pc-m-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--amber2);
+            text-align: center;
+        }
+
+        .pc-pay-opt {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            transition: all .13s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+            .pc-pay-opt:hover {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+            .pc-pay-opt.active {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-pay-icon {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .pc-btn-confirm {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 20px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background .13s;
+        }
+
+            .pc-btn-confirm:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-back {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 9px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 16px;
+        }
+
+        .pc-var-item {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: all .13s;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .pc-var-item:hover, .pc-var-item.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-var-def {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            background: #fff;
+            width: 100%;
+            text-align: left;
+            transition: all .13s;
+        }
+
+            .pc-var-def:hover, .pc-var-def.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-ok-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #fff;
+            margin: 0 auto;
+        }
+    </style>
+    @await RenderSectionAsync("HeadStyles", required: false)
+</head>
+<body>
+
+    <!-- ===== TOPBAR ===== -->
+    <div class="pc-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-logo-box">☕</div>
+            <span class="pc-brand">PolyCafe</span>
+            <span class="pc-tag">POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-clock">
+                <i class="fa fa-clock" style="color:var(--amber)"></i>
+                <span id="pc-clock">--:--:--</span>
+            </div>
+            <div class="pc-staff">
+                <span class="pc-dot"></span>
+                <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
+                Nhân viên
+            </div>
+            <button class="pc-bill-btn" onclick="pcToggleBill()">
+                <i class="fa fa-receipt"></i>Hóa đơn
+                <span class="pc-bill-badge" id="pc-bill-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== APP SHELL ===== -->
+    <div class="pc-shell">
+
+        <!-- MAIN: nội dung từng trang -->
+        <div class="pc-main" id="pc-main">
+            @RenderBody()
+        </div>
+
+        <!-- SIDEBAR: hóa đơn cố định -->
+        <div class="pc-sidebar" id="pc-sidebar">
+            <div class="pc-sb-inner">
+                <div class="pc-sb-head d-flex justify-content-between align-items-center">
+                    <span class="pc-sb-title">
+                        <i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Hóa Đơn
+                    </span>
+                    <span class="pc-sb-num" id="pc-onum">#001</span>
+                </div>
+
+                <div class="pc-order-scroll" id="pc-olist">
+                    <div class="pc-empty">
+                        <i class="fa fa-cart-shopping"></i>Chưa có món nào
+                    </div>
+                </div>
+
+                <div class="pc-sb-foot">
+                    <div class="d-flex gap-2 mb-2">
+                        <input class="pc-coup-in" id="pc-coup" placeholder="Nhập mã khuyến mãi..." />
+                        <button class="pc-coup-btn" onclick="pcApCoup()">
+                            <i class="fa fa-tag me-1"></i>Áp
+                        </button>
+                    </div>
+                    <div class="pc-row-sum">
+                        <span class="pc-lbl">Tạm tính</span>
+                        <span class="pc-val" id="pc-sub">0đ</span>
+                    </div>
+                    <div class="pc-row-sum" id="pc-drow" style="display:none">
+                        <span class="pc-lbl">
+                            <i class="fa fa-percent me-1" style="color:var(--green)"></i>
+                            <span id="pc-dlbl">Giảm giá</span>
+                        </span>
+                        <span class="pc-val-disc" id="pc-dval">−0đ</span>
+                    </div>
+                    <hr class="pc-sep" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="pc-grand-lbl">Tổng tiền</span>
+                        <span class="pc-grand-val" id="pc-tot">0đ</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="pc-btn-pay flex-fill" onclick="pcOpenPay()">
+                            <i class="fa fa-credit-card"></i> Thanh Toán
+                        </button>
+                        <button class="pc-btn-cancel" onclick="pcClrAll()">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="pc-toast-wrap" id="pc-toast-wrap">
+        <div class="pc-toast-box" id="pc-toast-box"></div>
+    </div>
+
+    <!-- ===== MODAL: CHỌN VARIANT ===== -->
+    <div class="modal fade" id="pcVarModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1">
+                    <i class="fa fa-sliders me-2" style="color:var(--amber)"></i>
+                    <span id="pc-vm-name"></span>
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">
+                    Giá gốc: <span id="pc-vm-base" style="color:var(--amber2);font-weight:800"></span>
+                </div>
+                <div id="pc-vm-list" class="d-flex flex-column gap-2 mb-3"></div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal">
+                        <i class="fa fa-arrow-left me-1"></i>Quay lại
+                    </button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmVar()">
+                        <i class="fa fa-plus me-1"></i>Thêm vào đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: THANH TOÁN ===== -->
+    <div class="modal fade" id="pcPayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1">
+                    <i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Thanh toán
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Chọn phương thức thanh toán</div>
+                <div class="pc-m-amount mb-3" id="pc-ma">0đ</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <div class="pc-pay-opt active" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-money-bill-wave" style="color:#22c55e"></i></div>
+                            Tiền mặt
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pc-pay-opt" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-qrcode" style="color:#3b82f6"></i></div>
+                            Chuyển khoản
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pc-pay-opt" onclick="pcSelPay(this)">
+                            <div class="pc-pay-icon"><i class="fa fa-gift" style="color:#f59e0b"></i></div>
+                            Voucher
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal">
+                        <i class="fa fa-arrow-left me-1"></i>Quay lại
+                    </button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmPay()">
+                        <i class="fa fa-check me-1"></i>Xác nhận thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: THÀNH CÔNG ===== -->
+    <div class="modal fade" id="pcOkModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content p-4 text-center">
+                <div class="pc-ok-icon mb-3"><i class="fa fa-check"></i></div>
+                <div class="pc-m-title mb-1">Thanh toán thành công!</div>
+                <div class="text-muted mb-1" style="font-size:12px;">Mã đơn hàng</div>
+                <div style="font-size:16px;font-weight:800;color:var(--amber2)" id="pc-ok-id"></div>
+                <div class="text-muted mt-1 mb-3" style="font-size:12px;">
+                    Tổng: <span id="pc-ok-tot" style="color:var(--green);font-weight:700"></span>
+                </div>
+                <button class="pc-btn-confirm w-100 justify-content-center" onclick="pcNewOrder()">
+                    <i class="fa fa-plus me-1"></i>Đơn mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // =====================================================================
+        // POLYCAFE LAYOUT - CART & BILL LOGIC (dùng chung toàn layout)
+        // Các trang con chỉ cần gọi: pcAddToCart(id, name, price, variantId, variantName, bg, emoji)
+        // =====================================================================
+
+        let pcCart = {};
+        let pcDiscount = 0, pcDiscType = '', pcDiscVal = 0, pcVoucherCode = '';
+        let pcOrderCount = 1, pcBillVisible = true;
+        let pcPendingDrink = null, pcSelVarId = null, pcSelVarExtra = 0, pcSelVarName = '';
+
+        const _pcVarModal = new bootstrap.Modal(document.getElementById('pcVarModal'));
+        const _pcPayModal = new bootstrap.Modal(document.getElementById('pcPayModal'));
+        const _pcOkModal  = new bootstrap.Modal(document.getElementById('pcOkModal'));
+
+        // Gọi từ trang con để mở modal chọn variant hoặc thêm thẳng vào giỏ
+        function pcCardClick(id, name, price, variants, bg, emoji, img) {
+            if (!pcBillVisible) {
+                pcBillVisible = true;
+                document.getElementById('pc-sidebar').classList.remove('hidden');
+            }
+            if (variants && variants.length > 0) {
+                pcOpenVarModal({ id, name, price, variants, bg, emoji, img: img||'' });
+            } else {
+                pcAddToCart(id, name, price, null, '', bg, emoji, img||'');
+            }
+        }
+
+        function pcOpenVarModal(drink) {
+            pcPendingDrink = drink;
+            pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            document.getElementById('pc-vm-name').textContent = drink.name;
+            document.getElementById('pc-vm-base').textContent = drink.price.toLocaleString('vi') + 'đ';
+
+            const list = document.getElementById('pc-vm-list');
+            list.innerHTML = '';
+
+            const def = document.createElement('button');
+            def.className = 'pc-var-def';
+            def.innerHTML = `<i class="fa fa-circle-dot me-2" style="color:#94a3b8"></i>Mặc định — <b>${drink.price.toLocaleString('vi')}đ</b>`;
+            def.onclick = () => {
+                list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel'));
+                def.classList.add('sel');
+                pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            };
+            list.appendChild(def);
+
+            drink.variants.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'pc-var-item';
+                el.innerHTML = `<span>${v.name}</span><span style="color:var(--amber2);font-weight:800">+${v.extra.toLocaleString('vi')}đ → ${(drink.price+v.extra).toLocaleString('vi')}đ</span>`;
+                el.onclick = () => {
+                    list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel'));
+                    el.classList.add('sel');
+                    pcSelVarId = v.id; pcSelVarExtra = v.extra; pcSelVarName = v.name;
+                };
+                list.appendChild(el);
+            });
+            _pcVarModal.show();
+        }
+
+        function pcCfmVar() {
+            if (!pcPendingDrink) return;
+            pcAddToCart(pcPendingDrink.id, pcPendingDrink.name, pcPendingDrink.price + pcSelVarExtra,
+                        pcSelVarId, pcSelVarName, pcPendingDrink.bg, pcPendingDrink.emoji, pcPendingDrink.img);
+            _pcVarModal.hide();
+            pcPendingDrink = null;
+        }
+
+        function pcAddToCart(id, name, price, varId, varName, bg, emoji, img) {
+            const key = id + (varId || '');
+            if (!pcCart[key]) pcCart[key] = { id, name, price, varId, varName, bg: bg||'#fef3c7', emoji: emoji||'☕', img: img||'', qty: 0 };
+            pcCart[key].qty++;
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            pcToast('<i class="fa fa-check me-1"></i>' + name + (varName ? ` (${varName})` : ''));
+            // Notify page để cập nhật badge sản phẩm
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcChgQty(key, d) {
+            if (!pcCart[key]) return;
+            pcCart[key].qty += d;
+            if (pcCart[key].qty <= 0) delete pcCart[key];
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(pcCart[key]?.id);
+        }
+
+        function pcDelItem(key) {
+            const id = pcCart[key]?.id;
+            delete pcCart[key];
+            pcRenderCart();
+            pcUpdBillBadge();
+            pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcRenderCart() {
+            const items = Object.entries(pcCart);
+            const l = document.getElementById('pc-olist');
+            if (!items.length) {
+                l.innerHTML = '<div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>';
+                pcUpdTotal(); return;
+            }
+            l.innerHTML = items.map(([key, i]) => {
+                // Thumbnail: ảnh nếu có, fallback emoji
+                const thumb = i.img
+                    ? `<img src="/images/drinks/${i.img}" alt="${i.name}"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                            style="width:100%;height:100%;object-fit:cover;border-radius:8px;" />
+                       <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:15px;">${i.emoji}</span>`
+                    : `<span>${i.emoji}</span>`;
+                return `
+                <div class="pc-oi">
+                    <div class="pc-oi-em" style="background:${i.bg}">${thumb}</div>
+                    <div class="flex-fill" style="min-width:0">
+                        <div class="pc-oi-name">${i.name}</div>
+                        ${i.varName ? `<div class="pc-oi-sub">${i.varName}</div>` : ''}
+                        <div class="pc-oi-price">${(i.price*i.qty).toLocaleString('vi')}đ</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                        <span class="pc-qnum">${i.qty}</span>
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <button class="pc-del" onclick="pcDelItem('${key}')"><i class="fa fa-xmark"></i></button>
+                </div>`;
+            }).join('');
+            pcUpdTotal();
+        }
+
+        function pcUpdTotal() {
+            const s = Object.values(pcCart).reduce((a,i) => a + i.price*i.qty, 0);
+            document.getElementById('pc-sub').textContent = s.toLocaleString('vi') + 'đ';
+            document.getElementById('pc-tot').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+        }
+
+        function pcUpdBillBadge() {
+            const t = Object.values(pcCart).reduce((a,i) => a+i.qty, 0);
+            const b = document.getElementById('pc-bill-badge');
+            t > 0 ? (b.style.display='flex', b.textContent=t) : (b.style.display='none');
+        }
+
+        function pcApCoup() {
+            const c = document.getElementById('pc-coup').value.trim();
+            if (!c) { pcToast('❌ Nhập mã khuyến mãi'); return; }
+            fetch(`/Order/CheckVoucher?code=${encodeURIComponent(c)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) {
+                        pcVoucherCode = c; pcDiscType = data.discountType; pcDiscVal = data.discountValue;
+                        pcRecalcDiscount(); pcToast('🎉 ' + data.message);
+                    } else {
+                        pcDiscount = 0; pcVoucherCode = '';
+                        document.getElementById('pc-drow').style.display = 'none';
+                        pcUpdTotal(); pcToast('❌ ' + data.message);
+                    }
+                });
+        }
+
+        function pcRecalcDiscount() {
+            if (!pcVoucherCode) return;
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            pcDiscount = pcDiscType === 'percent' ? Math.round(s * pcDiscVal / 100) : pcDiscVal;
+            document.getElementById('pc-drow').style.display = 'flex';
+            document.getElementById('pc-dlbl').textContent = pcDiscType === 'percent' ? `Giảm ${pcDiscVal}%` : 'Giảm giá';
+            document.getElementById('pc-dval').textContent = '−' + pcDiscount.toLocaleString('vi') + 'đ';
+            pcUpdTotal();
+        }
+
+        function pcClrAll() {
+            pcCart = {}; pcDiscount = 0; pcVoucherCode = ''; pcDiscType = ''; pcDiscVal = 0;
+            document.getElementById('pc-coup').value = '';
+            document.getElementById('pc-drow').style.display = 'none';
+            pcRenderCart(); pcUpdBillBadge();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(null);
+        }
+
+        function pcToggleBill() {
+            pcBillVisible = !pcBillVisible;
+            document.getElementById('pc-sidebar').classList.toggle('hidden', !pcBillVisible);
+        }
+
+        function pcOpenPay() {
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            if (!s) { pcToast('<i class="fa fa-triangle-exclamation me-1"></i>Chưa có món'); return; }
+            document.getElementById('pc-ma').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+            _pcPayModal.show();
+        }
+
+        function pcSelPay(el) {
+            document.querySelectorAll('.pc-pay-opt').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function pcCfmPay() {
+            _pcPayModal.hide();
+            const items = Object.values(pcCart).map(i => ({ drinkId: i.id, variantId: i.varId||null, quantity: i.qty }));
+            fetch('/Order/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, voucherCode: pcVoucherCode || null })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) pcShowOk(d.orderId, d.total);
+                else pcToast('❌ ' + (d.message || 'Lỗi'));
+            })
+            .catch(() => {
+                const total = Math.max(0, Object.values(pcCart).reduce((a,i)=>a+i.price*i.qty,0) - pcDiscount);
+                pcShowOk('ORD' + Date.now(), total);
+            });
+        }
+
+        function pcShowOk(id, total) {
+            pcOrderCount++;
+            document.getElementById('pc-onum').textContent = '#' + String(pcOrderCount).padStart(3,'0');
+            document.getElementById('pc-ok-id').textContent = id;
+            document.getElementById('pc-ok-tot').textContent = (typeof total === 'number' ? total : 0).toLocaleString('vi') + 'đ';
+            _pcOkModal.show();
+        }
+
+        function pcNewOrder() { _pcOkModal.hide(); pcClrAll(); }
+
+        let _pcToastTmr;
+        function pcToast(msg) {
+            const w = document.getElementById('pc-toast-wrap');
+            document.getElementById('pc-toast-box').innerHTML = msg;
+            w.classList.add('show');
+            clearTimeout(_pcToastTmr);
+            _pcToastTmr = setTimeout(() => w.classList.remove('show'), 2200);
+        }
+
+        // Clock
+        setInterval(() => {
+            document.getElementById('pc-clock').textContent =
+                new Date().toLocaleTimeString('vi', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }, 1000);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> *@
+@* _Layout.cshtml - PolyCafe POS Layout (cập nhật: hiện tên nhân viên từ Session) *@
+@* <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PolyCafe</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Web_QuanLy_PolyCafe.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --amber: #f59e0b;
+            --amber2: #d97706;
+            --green: #10b981;
+            --red: #ef4444;
+            --sb: #1e293b;
+            --sb2: #273548;
+            --bg: #f1f5f9;
+            --cream: #fef3c7;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+        }
+
+        .pc-topbar {
+            height: 54px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .pc-logo-box {
+            width: 34px;
+            height: 34px;
+            background: var(--amber);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .pc-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .pc-tag {
+            background: var(--cream);
+            color: var(--amber2);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pc-clock {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-staff {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .pc-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        .pc-staff-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            min-width: 160px;
+            padding: 6px 0;
+            z-index: 999;
+        }
+
+        .pc-staff:hover .pc-staff-menu {
+            display: block;
+        }
+
+        .pc-staff-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            text-decoration: none;
+            transition: background .1s;
+        }
+
+            .pc-staff-menu a:hover {
+                background: #f8fafc;
+            }
+
+            .pc-staff-menu a.text-danger {
+                color: #ef4444 !important;
+            }
+
+        .pc-bill-btn {
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background .15s;
+            position: relative;
+        }
+
+            .pc-bill-btn:hover {
+                background: #334155;
+            }
+
+        .pc-bill-badge {
+            background: var(--amber);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .pc-shell {
+            display: flex;
+            height: calc(100vh - 54px);
+            margin-top: 54px;
+            overflow: hidden;
+        }
+
+        .pc-main {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pc-sidebar {
+            width: 285px;
+            background: var(--sb);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width .35s cubic-bezier(.4,0,.2,1);
+        }
+
+            .pc-sidebar.hidden {
+                width: 0;
+            }
+
+        .pc-sb-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 285px;
+        }
+
+        .pc-sb-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-sb-title {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .pc-sb-num {
+            background: var(--amber);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+
+        .pc-order-scroll {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 0;
+        }
+
+            .pc-order-scroll::-webkit-scrollbar {
+                width: 3px;
+            }
+
+            .pc-order-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.12);
+                border-radius: 2px;
+            }
+
+        .pc-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255,255,255,.18);
+            font-size: 12px;
+            padding: 40px 0;
+            flex: 1;
+        }
+
+            .pc-empty i {
+                font-size: 32px;
+                opacity: .15;
+            }
+
+        .pc-oi {
+            background: var(--sb2);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 9px;
+            padding: 9px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pcUp .2s ease;
+        }
+
+        @@keyframes pcUp {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pc-oi:hover {
+            border-color: rgba(245,158,11,.3);
+        }
+
+        .pc-oi-em {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+            .pc-oi-em img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                border-radius: 8px;
+            }
+
+        .pc-oi-name {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pc-oi-sub {
+            color: rgba(255,255,255,.35);
+            font-size: 10px;
+        }
+
+        .pc-oi-price {
+            color: var(--amber);
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .pc-qbtn {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: transparent;
+            color: rgba(255,255,255,.6);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .1s;
+        }
+
+            .pc-qbtn:hover {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #fff;
+            }
+
+        .pc-qnum {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .pc-del {
+            background: transparent;
+            border: none;
+            color: rgba(255,80,80,.4);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            transition: color .1s;
+        }
+
+            .pc-del:hover {
+                color: var(--red);
+            }
+
+        .pc-sb-foot {
+            padding: 11px 13px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-coup-in {
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 7px;
+            padding: 7px 9px;
+            color: #fff;
+            font-size: 11px;
+            outline: none;
+            font-family: 'Nunito', sans-serif;
+            flex: 1;
+        }
+
+            .pc-coup-in::placeholder {
+                color: rgba(255,255,255,.22);
+            }
+
+            .pc-coup-in:focus {
+                border-color: var(--amber);
+            }
+
+        .pc-coup-btn {
+            background: transparent;
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            white-space: nowrap;
+        }
+
+            .pc-coup-btn:hover {
+                background: var(--amber);
+                color: #fff;
+            }
+
+        .pc-row-sum {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .pc-lbl {
+            color: rgba(255,255,255,.38);
+            font-size: 11px;
+        }
+
+        .pc-val {
+            color: rgba(255,255,255,.72);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pc-val-disc {
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .pc-sep {
+            border: none;
+            border-top: 1px dashed rgba(255,255,255,.1);
+            margin: 5px 0;
+        }
+
+        .pc-grand-lbl {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .pc-grand-val {
+            font-family: 'Playfair Display', serif;
+            color: var(--amber);
+            font-size: 20px;
+        }
+
+        .pc-btn-pay {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px;
+            transition: background .13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+        }
+
+            .pc-btn-pay:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-cancel {
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.22);
+            border-radius: 9px;
+            color: #f87171;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+            .pc-btn-cancel:hover {
+                background: rgba(239,68,68,.2);
+            }
+
+        .pc-toast-wrap {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .pc-toast-box {
+            background: #1e293b;
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            white-space: nowrap;
+            opacity: 0;
+            transition: all .25s;
+            transform: translateY(8px);
+        }
+
+        .pc-toast-wrap.show .pc-toast-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-content {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 16px 50px rgba(0,0,0,.16);
+        }
+
+        .pc-m-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 19px;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .pc-m-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--amber2);
+            text-align: center;
+        }
+
+        .pc-pay-opt {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            transition: all .13s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+            .pc-pay-opt:hover {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+            .pc-pay-opt.active {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-pay-icon {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .pc-btn-confirm {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 20px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background .13s;
+        }
+
+            .pc-btn-confirm:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-back {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 9px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 16px;
+        }
+
+        .pc-var-item {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: all .13s;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .pc-var-item:hover, .pc-var-item.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-var-def {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            background: #fff;
+            width: 100%;
+            text-align: left;
+            transition: all .13s;
+        }
+
+            .pc-var-def:hover, .pc-var-def.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-ok-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #fff;
+            margin: 0 auto;
+        }
+    </style>
+    @await RenderSectionAsync("HeadStyles", required: false)
+</head>
+<body>
+
+    @{
+        var staffName = Context.Session.GetString("FullName") ?? "Nhân viên";
+        var staffRole = Context.Session.GetString("Role") ?? "Staff";
+        // ✅ FIX 1: Số đơn tiếp theo = tổng đơn trong DB + 1
+        int nextOrderNum = (int)(ViewBag.OrderCount ?? 0) + 1;
+    }
+
+    <div class="pc-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-logo-box">☕</div>
+            <span class="pc-brand">PolyCafe</span>
+            <span class="pc-tag">POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-clock">
+                <i class="fa fa-clock" style="color:var(--amber)"></i>
+                <span id="pc-clock">--:--:--</span>
+            </div>
+            <div class="pc-staff">
+                <span class="pc-dot"></span>
+                <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
+                @staffName
+                <div class="pc-staff-menu">
+                    <a href="#"><i class="fa fa-user" style="color:var(--amber)"></i>@staffName</a>
+                    <a href="#"><i class="fa fa-shield-halved" style="color:#64748b"></i>@staffRole</a>
+                    <hr style="margin:4px 0;border-color:#f1f5f9;" />
+                    <a asp-controller="Account" asp-action="Logout" class="text-danger">
+                        <i class="fa fa-right-from-bracket"></i>Đăng xuất
+                    </a>
+                </div>
+            </div>
+            <button class="pc-bill-btn" onclick="pcToggleBill()">
+                <i class="fa fa-receipt"></i>Hóa đơn
+                <span class="pc-bill-badge" id="pc-bill-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="pc-shell">
+        <div class="pc-main" id="pc-main">@RenderBody()</div>
+
+        <div class="pc-sidebar" id="pc-sidebar">
+            <div class="pc-sb-inner">
+                <div class="pc-sb-head d-flex justify-content-between align-items-center">
+                    <span class="pc-sb-title"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Hóa Đơn</span>
+                    <!-- ✅ FIX 1: Hiển thị số đơn tiếp theo đúng từ DB -->
+                    <span class="pc-sb-num" id="pc-onum">#@nextOrderNum.ToString("D3")</span>
+                </div>
+                <div class="pc-order-scroll" id="pc-olist">
+                    <div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>
+                </div>
+                <div class="pc-sb-foot">
+                    <div class="d-flex gap-2 mb-2">
+                        <input class="pc-coup-in" id="pc-coup" placeholder="Nhập mã khuyến mãi..." />
+                        <button class="pc-coup-btn" onclick="pcApCoup()"><i class="fa fa-tag me-1"></i>Áp</button>
+                    </div>
+                    <div class="pc-row-sum"><span class="pc-lbl">Tạm tính</span><span class="pc-val" id="pc-sub">0đ</span></div>
+                    <div class="pc-row-sum" id="pc-drow" style="display:none">
+                        <span class="pc-lbl"><i class="fa fa-percent me-1" style="color:var(--green)"></i><span id="pc-dlbl">Giảm giá</span></span>
+                        <span class="pc-val-disc" id="pc-dval">−0đ</span>
+                    </div>
+                    <hr class="pc-sep" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="pc-grand-lbl">Tổng tiền</span>
+                        <span class="pc-grand-val" id="pc-tot">0đ</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="pc-btn-pay flex-fill" onclick="pcOpenPay()"><i class="fa fa-credit-card"></i> Thanh Toán</button>
+                        <button class="pc-btn-cancel" onclick="pcClrAll()"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pc-toast-wrap" id="pc-toast-wrap"><div class="pc-toast-box" id="pc-toast-box"></div></div>
+
+    <!-- MODAL: CHỌN VARIANT -->
+    <div class="modal fade" id="pcVarModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1"><i class="fa fa-sliders me-2" style="color:var(--amber)"></i><span id="pc-vm-name"></span></div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Giá gốc: <span id="pc-vm-base" style="color:var(--amber2);font-weight:800"></span></div>
+                <div id="pc-vm-list" class="d-flex flex-column gap-2 mb-3"></div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmVar()"><i class="fa fa-plus me-1"></i>Thêm vào đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: THANH TOÁN -->
+    <div class="modal fade" id="pcPayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Thanh toán</div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Chọn phương thức thanh toán</div>
+                <div class="pc-m-amount mb-3" id="pc-ma">0đ</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4"><div class="pc-pay-opt active" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-money-bill-wave" style="color:#22c55e"></i></div>Tiền mặt</div></div>
+                    <div class="col-4"><div class="pc-pay-opt" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-qrcode" style="color:#3b82f6"></i></div>Chuyển khoản</div></div>
+                    <div class="col-4"><div class="pc-pay-opt" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-gift" style="color:#f59e0b"></i></div>Voucher</div></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmPay()"><i class="fa fa-check me-1"></i>Xác nhận thanh toán</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: THÀNH CÔNG -->
+    <div class="modal fade" id="pcOkModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content p-4 text-center">
+                <div class="pc-ok-icon mb-3"><i class="fa fa-check"></i></div>
+                <div class="pc-m-title mb-1">Thanh toán thành công!</div>
+                <div class="text-muted mb-1" style="font-size:12px;">Mã đơn hàng</div>
+                <div style="font-size:16px;font-weight:800;color:var(--amber2)" id="pc-ok-id"></div>
+                <div class="text-muted mt-1 mb-3" style="font-size:12px;">Tổng: <span id="pc-ok-tot" style="color:var(--green);font-weight:700"></span></div>
+                <button class="pc-btn-confirm w-100 justify-content-center" onclick="pcNewOrder()"><i class="fa fa-plus me-1"></i>Đơn mới</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        let pcCart = {};
+        let pcDiscount = 0, pcDiscType = '', pcDiscVal = 0, pcVoucherCode = '';
+        let pcBillVisible = true;
+        let pcPendingDrink = null, pcSelVarId = null, pcSelVarExtra = 0, pcSelVarName = '';
+
+        // ✅ FIX 1: Lấy số đơn hiện tại từ DB (không hardcode = 1 nữa)
+        let pcOrderCount = @(ViewBag.OrderCount ?? 0);
+
+        const _pcVarModal = new bootstrap.Modal(document.getElementById('pcVarModal'));
+        const _pcPayModal = new bootstrap.Modal(document.getElementById('pcPayModal'));
+        const _pcOkModal  = new bootstrap.Modal(document.getElementById('pcOkModal'));
+
+        function pcCardClick(id, name, price, variants, bg, emoji, img) {
+            if (!pcBillVisible) { pcBillVisible = true; document.getElementById('pc-sidebar').classList.remove('hidden'); }
+            if (variants && variants.length > 0) pcOpenVarModal({ id, name, price, variants, bg, emoji, img: img||'' });
+            else pcAddToCart(id, name, price, null, '', bg, emoji, img||'');
+        }
+
+        function pcOpenVarModal(drink) {
+            pcPendingDrink = drink; pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            document.getElementById('pc-vm-name').textContent = drink.name;
+            document.getElementById('pc-vm-base').textContent = drink.price.toLocaleString('vi') + 'đ';
+            const list = document.getElementById('pc-vm-list');
+            list.innerHTML = '';
+            const def = document.createElement('button');
+            def.className = 'pc-var-def';
+            def.innerHTML = `<i class="fa fa-circle-dot me-2" style="color:#94a3b8"></i>Mặc định — <b>${drink.price.toLocaleString('vi')}đ</b>`;
+            def.onclick = () => { list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel')); def.classList.add('sel'); pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = ''; };
+            list.appendChild(def);
+            drink.variants.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'pc-var-item';
+                el.innerHTML = `<span>${v.name}</span><span style="color:var(--amber2);font-weight:800">+${v.extra.toLocaleString('vi')}đ → ${(drink.price+v.extra).toLocaleString('vi')}đ</span>`;
+                el.onclick = () => { list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); pcSelVarId = v.id; pcSelVarExtra = v.extra; pcSelVarName = v.name; };
+                list.appendChild(el);
+            });
+            _pcVarModal.show();
+        }
+
+        function pcCfmVar() {
+            if (!pcPendingDrink) return;
+            pcAddToCart(pcPendingDrink.id, pcPendingDrink.name, pcPendingDrink.price + pcSelVarExtra, pcSelVarId, pcSelVarName, pcPendingDrink.bg, pcPendingDrink.emoji, pcPendingDrink.img);
+            _pcVarModal.hide(); pcPendingDrink = null;
+        }
+
+        function pcAddToCart(id, name, price, varId, varName, bg, emoji, img) {
+            const key = id + (varId || '');
+            if (!pcCart[key]) pcCart[key] = { id, name, price, varId, varName, bg: bg||'#fef3c7', emoji: emoji||'☕', img: img||'', qty: 0 };
+            pcCart[key].qty++;
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            pcToast('<i class="fa fa-check me-1"></i>' + name + (varName ? ` (${varName})` : ''));
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcChgQty(key, d) {
+            if (!pcCart[key]) return;
+            pcCart[key].qty += d;
+            if (pcCart[key].qty <= 0) delete pcCart[key];
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(pcCart[key]?.id);
+        }
+
+        function pcDelItem(key) {
+            const id = pcCart[key]?.id; delete pcCart[key];
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcRenderCart() {
+            const items = Object.entries(pcCart);
+            const l = document.getElementById('pc-olist');
+            if (!items.length) { l.innerHTML = '<div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>'; pcUpdTotal(); return; }
+            l.innerHTML = items.map(([key, i]) => {
+                const thumb = i.img
+                    ? `<img src="/images/drinks/${i.img}" alt="${i.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" /><span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:15px;">${i.emoji}</span>`
+                    : `<span>${i.emoji}</span>`;
+                return `<div class="pc-oi">
+                    <div class="pc-oi-em" style="background:${i.bg}">${thumb}</div>
+                    <div class="flex-fill" style="min-width:0">
+                        <div class="pc-oi-name">${i.name}</div>
+                        ${i.varName ? `<div class="pc-oi-sub">${i.varName}</div>` : ''}
+                        <div class="pc-oi-price">${(i.price*i.qty).toLocaleString('vi')}đ</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                        <span class="pc-qnum">${i.qty}</span>
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <button class="pc-del" onclick="pcDelItem('${key}')"><i class="fa fa-xmark"></i></button>
+                </div>`;
+            }).join('');
+            pcUpdTotal();
+        }
+
+        function pcUpdTotal() {
+            const s = Object.values(pcCart).reduce((a,i) => a + i.price*i.qty, 0);
+            document.getElementById('pc-sub').textContent = s.toLocaleString('vi') + 'đ';
+            document.getElementById('pc-tot').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+        }
+
+        function pcUpdBillBadge() {
+            const t = Object.values(pcCart).reduce((a,i) => a+i.qty, 0);
+            const b = document.getElementById('pc-bill-badge');
+            t > 0 ? (b.style.display='flex', b.textContent=t) : (b.style.display='none');
+        }
+
+        function pcApCoup() {
+            const c = document.getElementById('pc-coup').value.trim();
+            if (!c) { pcToast('❌ Nhập mã khuyến mãi'); return; }
+            fetch(`/Order/CheckVoucher?code=${encodeURIComponent(c)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) { pcVoucherCode = c; pcDiscType = data.discountType; pcDiscVal = data.discountValue; pcRecalcDiscount(); pcToast('🎉 ' + data.message); }
+                    else { pcDiscount = 0; pcVoucherCode = ''; document.getElementById('pc-drow').style.display = 'none'; pcUpdTotal(); pcToast('❌ ' + data.message); }
+                });
+        }
+
+        function pcRecalcDiscount() {
+            if (!pcVoucherCode) return;
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            pcDiscount = pcDiscType === 'percent' ? Math.round(s * pcDiscVal / 100) : pcDiscVal;
+            document.getElementById('pc-drow').style.display = 'flex';
+            document.getElementById('pc-dlbl').textContent = pcDiscType === 'percent' ? `Giảm ${pcDiscVal}%` : 'Giảm giá';
+            document.getElementById('pc-dval').textContent = '−' + pcDiscount.toLocaleString('vi') + 'đ';
+            pcUpdTotal();
+        }
+
+        function pcClrAll() {
+            pcCart = {}; pcDiscount = 0; pcVoucherCode = ''; pcDiscType = ''; pcDiscVal = 0;
+            document.getElementById('pc-coup').value = '';
+            document.getElementById('pc-drow').style.display = 'none';
+            pcRenderCart(); pcUpdBillBadge();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(null);
+        }
+
+        function pcToggleBill() {
+            pcBillVisible = !pcBillVisible;
+            document.getElementById('pc-sidebar').classList.toggle('hidden', !pcBillVisible);
+        }
+
+        function pcOpenPay() {
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            if (!s) { pcToast('<i class="fa fa-triangle-exclamation me-1"></i>Chưa có món'); return; }
+            document.getElementById('pc-ma').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+            _pcPayModal.show();
+        }
+
+        function pcSelPay(el) {
+            document.querySelectorAll('.pc-pay-opt').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // ✅ FIX 2: Cập nhật pcOrderCount từ response DB, KHÔNG fallback tạo đơn giả
+        function pcCfmPay() {
+            _pcPayModal.hide();
+            const items = Object.values(pcCart).map(i => ({ drinkId: i.id, variantId: i.varId||null, quantity: i.qty }));
+            fetch('/Order/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, voucherCode: pcVoucherCode || null })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    // ✅ Nhận orderCount mới từ DB và cập nhật
+                    if (d.orderCount) pcOrderCount = d.orderCount;
+                    pcShowOk(d.orderId, d.total);
+                } else {
+                    pcToast('❌ ' + (d.message || 'Lỗi'));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                pcToast('❌ Không thể kết nối server. Vui lòng thử lại.');
+            });
+        }
+
+        // ✅ FIX 3: KHÔNG tự tăng pcOrderCount ở đây nữa — cập nhật số đơn TIẾP THEO
+        function pcShowOk(id, total) {
+            document.getElementById('pc-onum').textContent = '#' + String(pcOrderCount + 1).padStart(3,'0');
+            document.getElementById('pc-ok-id').textContent = id;
+            document.getElementById('pc-ok-tot').textContent = (typeof total === 'number' ? total : 0).toLocaleString('vi') + 'đ';
+            _pcOkModal.show();
+        }
+
+        function pcNewOrder() { _pcOkModal.hide(); pcClrAll(); }
+
+        let _pcToastTmr;
+        function pcToast(msg) {
+            const w = document.getElementById('pc-toast-wrap');
+            document.getElementById('pc-toast-box').innerHTML = msg;
+            w.classList.add('show');
+            clearTimeout(_pcToastTmr);
+            _pcToastTmr = setTimeout(() => w.classList.remove('show'), 2200);
+        }
+
+        setInterval(() => {
+            document.getElementById('pc-clock').textContent =
+                new Date().toLocaleTimeString('vi', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }, 1000);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> *@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PolyCafe</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Web_QuanLy_PolyCafe.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --amber: #f59e0b;
+            --amber2: #d97706;
+            --green: #10b981;
+            --red: #ef4444;
+            --sb: #1e293b;
+            --sb2: #273548;
+            --bg: #f1f5f9;
+            --cream: #fef3c7;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+        }
+
+        .pc-topbar {
+            height: 54px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .pc-logo-box {
+            width: 34px;
+            height: 34px;
+            background: var(--amber);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+            .pc-logo-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .pc-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .pc-tag {
+            background: var(--cream);
+            color: var(--amber2);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pc-clock {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pc-staff {
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .pc-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        .pc-staff-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            min-width: 180px;
+            padding: 6px 0;
+            z-index: 999;
+        }
+
+        .pc-staff:hover .pc-staff-menu {
+            display: block;
+        }
+
+        .pc-staff-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            text-decoration: none;
+            transition: background .1s;
+        }
+
+            .pc-staff-menu a:hover {
+                background: #f8fafc;
+            }
+
+            .pc-staff-menu a.text-danger {
+                color: #ef4444 !important;
+            }
+
+        .pc-bill-btn {
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background .15s;
+            position: relative;
+        }
+
+            .pc-bill-btn:hover {
+                background: #334155;
+            }
+
+        .pc-bill-badge {
+            background: var(--amber);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .pc-shell {
+            display: flex;
+            height: calc(100vh - 54px);
+            margin-top: 54px;
+            overflow: hidden;
+        }
+
+        .pc-main {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pc-sidebar {
+            width: 285px;
+            background: var(--sb);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width .35s cubic-bezier(.4,0,.2,1);
+        }
+
+            .pc-sidebar.hidden {
+                width: 0;
+            }
+
+        .pc-sb-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 285px;
+        }
+
+        .pc-sb-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-sb-title {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .pc-sb-num {
+            background: var(--amber);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+
+        .pc-order-scroll {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 0;
+        }
+
+            .pc-order-scroll::-webkit-scrollbar {
+                width: 3px;
+            }
+
+            .pc-order-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.12);
+                border-radius: 2px;
+            }
+
+        .pc-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255,255,255,.18);
+            font-size: 12px;
+            padding: 40px 0;
+            flex: 1;
+        }
+
+            .pc-empty i {
+                font-size: 32px;
+                opacity: .15;
+            }
+
+        .pc-oi {
+            background: var(--sb2);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 9px;
+            padding: 9px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pcUp .2s ease;
+        }
+
+        @@keyframes pcUp {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pc-oi:hover {
+            border-color: rgba(245,158,11,.3);
+        }
+
+        .pc-oi-em {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+            .pc-oi-em img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                border-radius: 8px;
+            }
+
+        .pc-oi-name {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pc-oi-sub {
+            color: rgba(255,255,255,.35);
+            font-size: 10px;
+        }
+
+        .pc-oi-price {
+            color: var(--amber);
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .pc-qbtn {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: transparent;
+            color: rgba(255,255,255,.6);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .1s;
+        }
+
+            .pc-qbtn:hover {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #fff;
+            }
+
+        .pc-qnum {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .pc-del {
+            background: transparent;
+            border: none;
+            color: rgba(255,80,80,.4);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            transition: color .1s;
+        }
+
+            .pc-del:hover {
+                color: var(--red);
+            }
+
+        .pc-sb-foot {
+            padding: 11px 13px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+
+        .pc-coup-in {
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 7px;
+            padding: 7px 9px;
+            color: #fff;
+            font-size: 11px;
+            outline: none;
+            font-family: 'Nunito', sans-serif;
+            flex: 1;
+        }
+
+            .pc-coup-in::placeholder {
+                color: rgba(255,255,255,.22);
+            }
+
+            .pc-coup-in:focus {
+                border-color: var(--amber);
+            }
+
+        .pc-coup-btn {
+            background: transparent;
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            white-space: nowrap;
+        }
+
+            .pc-coup-btn:hover {
+                background: var(--amber);
+                color: #fff;
+            }
+
+        .pc-row-sum {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .pc-lbl {
+            color: rgba(255,255,255,.38);
+            font-size: 11px;
+        }
+
+        .pc-val {
+            color: rgba(255,255,255,.72);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pc-val-disc {
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .pc-sep {
+            border: none;
+            border-top: 1px dashed rgba(255,255,255,.1);
+            margin: 5px 0;
+        }
+
+        .pc-grand-lbl {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .pc-grand-val {
+            font-family: 'Playfair Display', serif;
+            color: var(--amber);
+            font-size: 20px;
+        }
+
+        .pc-btn-pay {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px;
+            transition: background .13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+        }
+
+            .pc-btn-pay:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-cancel {
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.22);
+            border-radius: 9px;
+            color: #f87171;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+            .pc-btn-cancel:hover {
+                background: rgba(239,68,68,.2);
+            }
+
+        .pc-toast-wrap {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .pc-toast-box {
+            background: #1e293b;
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            white-space: nowrap;
+            opacity: 0;
+            transition: all .25s;
+            transform: translateY(8px);
+        }
+
+        .pc-toast-wrap.show .pc-toast-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-content {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 16px 50px rgba(0,0,0,.16);
+        }
+
+        .pc-m-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 19px;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .pc-m-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--amber2);
+            text-align: center;
+        }
+
+        .pc-pay-opt {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            transition: all .13s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+            .pc-pay-opt:hover {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+            .pc-pay-opt.active {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-pay-icon {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .pc-btn-confirm {
+            background: var(--amber);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 20px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background .13s;
+        }
+
+            .pc-btn-confirm:hover {
+                background: var(--amber2);
+            }
+
+        .pc-btn-back {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 9px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            padding: 11px 16px;
+        }
+
+        .pc-var-item {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: all .13s;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .pc-var-item:hover, .pc-var-item.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-var-def {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            background: #fff;
+            width: 100%;
+            text-align: left;
+            transition: all .13s;
+        }
+
+            .pc-var-def:hover, .pc-var-def.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pc-ok-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #fff;
+            margin: 0 auto;
+        }
+    </style>
+    @await RenderSectionAsync("HeadStyles", required: false)
+</head>
+<body>
+
+    @{
+        var staffName = Context.Session.GetString("FullName") ?? "Nhân viên";
+        var staffRole = Context.Session.GetString("Role") ?? "Staff";
+        int nextOrderNum = (int)(ViewBag.OrderCount ?? 0) + 1;
+    }
+
+    <div class="pc-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-logo-box">
+                <img src="~/images/logo.png" alt="PolyCafe Logo" />
+            </div>
+            <span class="pc-brand">PolyCafe</span>
+            <span class="pc-tag">POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="pc-clock">
+                <i class="fa fa-clock" style="color:var(--amber)"></i>
+                <span id="pc-clock">--:--:--</span>
+            </div>
+            <div class="pc-staff">
+                <span class="pc-dot"></span>
+                <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
+                @staffName
+                <div class="pc-staff-menu">
+                    <!-- Tên + role (readonly) -->
+                    <a href="#" style="pointer-events:none;opacity:.6">
+                        <i class="fa fa-user" style="color:var(--amber)"></i>@staffName
+                    </a>
+                    @* <a href="#" style="pointer-events:none;opacity:.6">
+                        <i class="fa fa-shield-halved" style="color:#64748b"></i>@staffRole
+                    </a> *@
+                    <hr style="margin:4px 0;border-color:#f1f5f9;" />
+                    <!-- ✅ THÔNG TIN CÁ NHÂN -->
+                    <a asp-controller="Account" asp-action="Profile">
+                        <i class="fa fa-id-card" style="color:#3b82f6"></i>Thông tin cá nhân
+                    </a>
+                    <hr style="margin:4px 0;border-color:#f1f5f9;" />
+                    <a asp-controller="Account" asp-action="Logout" class="text-danger">
+                        <i class="fa fa-right-from-bracket"></i>Đăng xuất
+                    </a>
+                </div>
+            </div>
+            <button class="pc-bill-btn" onclick="pcToggleBill()">
+                <i class="fa fa-receipt"></i>Hóa đơn
+                <span class="pc-bill-badge" id="pc-bill-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="pc-shell">
+        <div class="pc-main" id="pc-main">@RenderBody()</div>
+
+        <div class="pc-sidebar" id="pc-sidebar">
+            <div class="pc-sb-inner">
+                <div class="pc-sb-head d-flex justify-content-between align-items-center">
+                    <span class="pc-sb-title"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Hóa Đơn</span>
+                    <span class="pc-sb-num" id="pc-onum">#@nextOrderNum.ToString("D3")</span>
+                </div>
+                <div class="pc-order-scroll" id="pc-olist">
+                    <div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>
+                </div>
+                <div class="pc-sb-foot">
+                    <div class="d-flex gap-2 mb-2">
+                        <input class="pc-coup-in" id="pc-coup" placeholder="Nhập mã khuyến mãi..." />
+                        <button class="pc-coup-btn" onclick="pcApCoup()"><i class="fa fa-tag me-1"></i>Áp</button>
+                    </div>
+                    <div class="pc-row-sum"><span class="pc-lbl">Tạm tính</span><span class="pc-val" id="pc-sub">0đ</span></div>
+                    <div class="pc-row-sum" id="pc-drow" style="display:none">
+                        <span class="pc-lbl"><i class="fa fa-percent me-1" style="color:var(--green)"></i><span id="pc-dlbl">Giảm giá</span></span>
+                        <span class="pc-val-disc" id="pc-dval">−0đ</span>
+                    </div>
+                    <hr class="pc-sep" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="pc-grand-lbl">Tổng tiền</span>
+                        <span class="pc-grand-val" id="pc-tot">0đ</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="pc-btn-pay flex-fill" onclick="pcOpenPay()"><i class="fa fa-credit-card"></i> Thanh Toán</button>
+                        <button class="pc-btn-cancel" onclick="pcClrAll()"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pc-toast-wrap" id="pc-toast-wrap"><div class="pc-toast-box" id="pc-toast-box"></div></div>
+
+    <!-- MODAL: CHỌN VARIANT -->
+    <div class="modal fade" id="pcVarModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1"><i class="fa fa-sliders me-2" style="color:var(--amber)"></i><span id="pc-vm-name"></span></div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Giá gốc: <span id="pc-vm-base" style="color:var(--amber2);font-weight:800"></span></div>
+                <div id="pc-vm-list" class="d-flex flex-column gap-2 mb-3"></div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmVar()"><i class="fa fa-plus me-1"></i>Thêm vào đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: THANH TOÁN -->
+    <div class="modal fade" id="pcPayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="pc-m-title mb-1"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Thanh toán</div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Chọn phương thức thanh toán</div>
+                <div class="pc-m-amount mb-3" id="pc-ma">0đ</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4"><div class="pc-pay-opt active" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-money-bill-wave" style="color:#22c55e"></i></div>Tiền mặt</div></div>
+                    <div class="col-4"><div class="pc-pay-opt" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-qrcode" style="color:#3b82f6"></i></div>Chuyển khoản</div></div>
+                    <div class="col-4"><div class="pc-pay-opt" onclick="pcSelPay(this)"><div class="pc-pay-icon"><i class="fa fa-gift" style="color:#f59e0b"></i></div>Voucher</div></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="pc-btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="pc-btn-confirm flex-fill" onclick="pcCfmPay()"><i class="fa fa-check me-1"></i>Xác nhận thanh toán</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: THÀNH CÔNG -->
+    <div class="modal fade" id="pcOkModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content p-4 text-center">
+                <div class="pc-ok-icon mb-3"><i class="fa fa-check"></i></div>
+                <div class="pc-m-title mb-1">Thanh toán thành công!</div>
+                <div class="text-muted mb-1" style="font-size:12px;">Mã đơn hàng</div>
+                <div style="font-size:16px;font-weight:800;color:var(--amber2)" id="pc-ok-id"></div>
+                <div class="text-muted mt-1 mb-3" style="font-size:12px;">Tổng: <span id="pc-ok-tot" style="color:var(--green);font-weight:700"></span></div>
+                <button class="pc-btn-confirm w-100 justify-content-center" onclick="pcNewOrder()"><i class="fa fa-plus me-1"></i>Đơn mới</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        let pcCart = {};
+        let pcDiscount = 0, pcDiscType = '', pcDiscVal = 0, pcVoucherCode = '';
+        let pcBillVisible = true;
+        let pcPendingDrink = null, pcSelVarId = null, pcSelVarExtra = 0, pcSelVarName = '';
+        let pcOrderCount = @(ViewBag.OrderCount ?? 0);
+
+        const _pcVarModal = new bootstrap.Modal(document.getElementById('pcVarModal'));
+        const _pcPayModal = new bootstrap.Modal(document.getElementById('pcPayModal'));
+        const _pcOkModal  = new bootstrap.Modal(document.getElementById('pcOkModal'));
+
+        function pcCardClick(id, name, price, variants, bg, emoji, img) {
+            if (!pcBillVisible) { pcBillVisible = true; document.getElementById('pc-sidebar').classList.remove('hidden'); }
+            if (variants && variants.length > 0) pcOpenVarModal({ id, name, price, variants, bg, emoji, img: img||'' });
+            else pcAddToCart(id, name, price, null, '', bg, emoji, img||'');
+        }
+
+        function pcOpenVarModal(drink) {
+            pcPendingDrink = drink; pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = '';
+            document.getElementById('pc-vm-name').textContent = drink.name;
+            document.getElementById('pc-vm-base').textContent = drink.price.toLocaleString('vi') + 'đ';
+            const list = document.getElementById('pc-vm-list');
+            list.innerHTML = '';
+            const def = document.createElement('button');
+            def.className = 'pc-var-def';
+            def.innerHTML = `<i class="fa fa-circle-dot me-2" style="color:#94a3b8"></i>Mặc định — <b>${drink.price.toLocaleString('vi')}đ</b>`;
+            def.onclick = () => { list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel')); def.classList.add('sel'); pcSelVarId = null; pcSelVarExtra = 0; pcSelVarName = ''; };
+            list.appendChild(def);
+            drink.variants.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'pc-var-item';
+                el.innerHTML = `<span>${v.name}</span><span style="color:var(--amber2);font-weight:800">+${v.extra.toLocaleString('vi')}đ → ${(drink.price+v.extra).toLocaleString('vi')}đ</span>`;
+                el.onclick = () => { list.querySelectorAll('.pc-var-def,.pc-var-item').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); pcSelVarId = v.id; pcSelVarExtra = v.extra; pcSelVarName = v.name; };
+                list.appendChild(el);
+            });
+            _pcVarModal.show();
+        }
+
+        function pcCfmVar() {
+            if (!pcPendingDrink) return;
+            pcAddToCart(pcPendingDrink.id, pcPendingDrink.name, pcPendingDrink.price + pcSelVarExtra, pcSelVarId, pcSelVarName, pcPendingDrink.bg, pcPendingDrink.emoji, pcPendingDrink.img);
+            _pcVarModal.hide(); pcPendingDrink = null;
+        }
+
+        function pcAddToCart(id, name, price, varId, varName, bg, emoji, img) {
+            const key = id + (varId || '');
+            if (!pcCart[key]) pcCart[key] = { id, name, price, varId, varName, bg: bg||'#fef3c7', emoji: emoji||'☕', img: img||'', qty: 0 };
+            pcCart[key].qty++;
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            pcToast('<i class="fa fa-check me-1"></i>' + name + (varName ? ` (${varName})` : ''));
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcChgQty(key, d) {
+            if (!pcCart[key]) return;
+            pcCart[key].qty += d;
+            if (pcCart[key].qty <= 0) delete pcCart[key];
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(pcCart[key]?.id);
+        }
+
+        function pcDelItem(key) {
+            const id = pcCart[key]?.id; delete pcCart[key];
+            pcRenderCart(); pcUpdBillBadge(); pcRecalcDiscount();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(id);
+        }
+
+        function pcRenderCart() {
+            const items = Object.entries(pcCart);
+            const l = document.getElementById('pc-olist');
+            if (!items.length) { l.innerHTML = '<div class="pc-empty"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>'; pcUpdTotal(); return; }
+            l.innerHTML = items.map(([key, i]) => {
+                const thumb = i.img
+                    ? `<img src="/images/drinks/${i.img}" alt="${i.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" /><span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:15px;">${i.emoji}</span>`
+                    : `<span>${i.emoji}</span>`;
+                return `<div class="pc-oi">
+                    <div class="pc-oi-em" style="background:${i.bg}">${thumb}</div>
+                    <div class="flex-fill" style="min-width:0">
+                        <div class="pc-oi-name">${i.name}</div>
+                        ${i.varName ? `<div class="pc-oi-sub">${i.varName}</div>` : ''}
+                        <div class="pc-oi-price">${(i.price*i.qty).toLocaleString('vi')}đ</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                        <span class="pc-qnum">${i.qty}</span>
+                        <button class="pc-qbtn" onclick="pcChgQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <button class="pc-del" onclick="pcDelItem('${key}')"><i class="fa fa-xmark"></i></button>
+                </div>`;
+            }).join('');
+            pcUpdTotal();
+        }
+
+        function pcUpdTotal() {
+            const s = Object.values(pcCart).reduce((a,i) => a + i.price*i.qty, 0);
+            document.getElementById('pc-sub').textContent = s.toLocaleString('vi') + 'đ';
+            document.getElementById('pc-tot').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+        }
+
+        function pcUpdBillBadge() {
+            const t = Object.values(pcCart).reduce((a,i) => a+i.qty, 0);
+            const b = document.getElementById('pc-bill-badge');
+            t > 0 ? (b.style.display='flex', b.textContent=t) : (b.style.display='none');
+        }
+
+        function pcApCoup() {
+            const c = document.getElementById('pc-coup').value.trim();
+            if (!c) { pcToast('❌ Nhập mã khuyến mãi'); return; }
+            fetch(`/Order/CheckVoucher?code=${encodeURIComponent(c)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) { pcVoucherCode = c; pcDiscType = data.discountType; pcDiscVal = data.discountValue; pcRecalcDiscount(); pcToast('🎉 ' + data.message); }
+                    else { pcDiscount = 0; pcVoucherCode = ''; document.getElementById('pc-drow').style.display = 'none'; pcUpdTotal(); pcToast('❌ ' + data.message); }
+                });
+        }
+
+        function pcRecalcDiscount() {
+            if (!pcVoucherCode) return;
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            pcDiscount = pcDiscType === 'percent' ? Math.round(s * pcDiscVal / 100) : pcDiscVal;
+            document.getElementById('pc-drow').style.display = 'flex';
+            document.getElementById('pc-dlbl').textContent = pcDiscType === 'percent' ? `Giảm ${pcDiscVal}%` : 'Giảm giá';
+            document.getElementById('pc-dval').textContent = '−' + pcDiscount.toLocaleString('vi') + 'đ';
+            pcUpdTotal();
+        }
+
+        function pcClrAll() {
+            pcCart = {}; pcDiscount = 0; pcVoucherCode = ''; pcDiscType = ''; pcDiscVal = 0;
+            document.getElementById('pc-coup').value = '';
+            document.getElementById('pc-drow').style.display = 'none';
+            pcRenderCart(); pcUpdBillBadge();
+            if (typeof pcOnCartChange === 'function') pcOnCartChange(null);
+        }
+
+        function pcToggleBill() {
+            pcBillVisible = !pcBillVisible;
+            document.getElementById('pc-sidebar').classList.toggle('hidden', !pcBillVisible);
+        }
+
+        function pcOpenPay() {
+            const s = Object.values(pcCart).reduce((a,i) => a+i.price*i.qty, 0);
+            if (!s) { pcToast('<i class="fa fa-triangle-exclamation me-1"></i>Chưa có món'); return; }
+            document.getElementById('pc-ma').textContent = Math.max(0, s - pcDiscount).toLocaleString('vi') + 'đ';
+            _pcPayModal.show();
+        }
+
+        function pcSelPay(el) {
+            document.querySelectorAll('.pc-pay-opt').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function pcCfmPay() {
+            _pcPayModal.hide();
+            const items = Object.values(pcCart).map(i => ({ drinkId: i.id, variantId: i.varId||null, quantity: i.qty }));
+            fetch('/Order/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, voucherCode: pcVoucherCode || null })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    if (d.orderCount) pcOrderCount = d.orderCount;
+                    pcShowOk(d.orderId, d.total);
+                } else {
+                    pcToast('❌ ' + (d.message || 'Lỗi'));
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                pcToast('❌ Không thể kết nối server. Vui lòng thử lại.');
+            });
+        }
+
+        function pcShowOk(id, total) {
+            document.getElementById('pc-onum').textContent = '#' + String(pcOrderCount + 1).padStart(3,'0');
+            document.getElementById('pc-ok-id').textContent = id;
+            document.getElementById('pc-ok-tot').textContent = (typeof total === 'number' ? total : 0).toLocaleString('vi') + 'đ';
+            _pcOkModal.show();
+        }
+
+        function pcNewOrder() { _pcOkModal.hide(); pcClrAll(); }
+
+        let _pcToastTmr;
+        function pcToast(msg) {
+            const w = document.getElementById('pc-toast-wrap');
+            document.getElementById('pc-toast-box').innerHTML = msg;
+            w.classList.add('show');
+            clearTimeout(_pcToastTmr);
+            _pcToastTmr = setTimeout(() => w.classList.remove('show'), 2200);
+        }
+
+        setInterval(() => {
+            document.getElementById('pc-clock').textContent =
+                new Date().toLocaleTimeString('vi', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }, 1000);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+
+

@@ -1,0 +1,1938 @@
+﻿@* @model Web_QuanLy_PolyCafe.Models.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var roleName = Model.Role ? "Quản trị viên" : "Nhân viên";
+    var roleColor = Model.Role ? "#f59e0b" : "#10b981";
+    var roleIcon = Model.Role ? "fa-crown" : "fa-user-tie";
+    var initials = string.IsNullOrEmpty(Model.FullName) ? "?"
+                    : string.Join("", Model.FullName.Trim().Split(' ').TakeLast(2).Select(w => w[0])).ToUpper();
+    var statusColor = Model.IsActive ? "#10b981" : "#ef4444";
+    var statusText = Model.IsActive ? "Đang hoạt động" : "Đã vô hiệu hoá";
+}
+
+@section HeadStyles {
+    <style>
+        /* ===== WRAPPER SCROLLABLE ===== */
+        .pf-wrap {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+            .pf-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pf-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        /* ===== CARD BASE ===== */
+        .pf-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+
+        .pf-card-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pf-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .pf-card-body {
+            padding: 20px;
+        }
+
+        /* ===== HERO CARD ===== */
+        .pf-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #273548 100%);
+            border-radius: 16px;
+            padding: 28px 24px;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* decoration circles */
+            .pf-hero::before {
+                content: '';
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                border: 30px solid rgba(245,158,11,.08);
+                top: -60px;
+                right: -40px;
+            }
+
+            .pf-hero::after {
+                content: '';
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: 20px solid rgba(245,158,11,.06);
+                bottom: -30px;
+                right: 80px;
+            }
+
+        .pf-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Playfair Display', serif;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,.2);
+            box-shadow: 0 4px 16px rgba(245,158,11,.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .pf-hero-info {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pf-hero-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pf-hero-id {
+            font-size: 11px;
+            color: rgba(255,255,255,.4);
+            margin-bottom: 10px;
+            font-family: 'Nunito', monospace;
+        }
+
+        .pf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1px solid;
+        }
+
+        .pf-badge-role {
+            background: rgba(245,158,11,.15);
+            color: #f59e0b;
+            border-color: rgba(245,158,11,.3);
+            margin-right: 6px;
+        }
+
+        .pf-badge-status-active {
+            background: rgba(16,185,129,.15);
+            color: #10b981;
+            border-color: rgba(16,185,129,.3);
+        }
+
+        .pf-badge-status-inactive {
+            background: rgba(239,68,68,.15);
+            color: #ef4444;
+            border-color: rgba(239,68,68,.3);
+        }
+
+        /* ===== STATS ROW ===== */
+        .pf-stat {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-stat:hover {
+                border-color: var(--amber);
+                box-shadow: 0 2px 10px rgba(245,158,11,.1);
+            }
+
+        .pf-stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .pf-stat-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pf-stat-lbl {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* ===== INFO ROWS ===== */
+        .pf-info-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 11px 0;
+            border-bottom: 1px solid #f8fafc;
+            gap: 12px;
+        }
+
+            .pf-info-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .pf-info-row:first-child {
+                padding-top: 0;
+            }
+
+        .pf-info-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: var(--amber2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .pf-info-lbl {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .pf-info-val {
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .pf-info-empty {
+            font-size: 13px;
+            color: #cbd5e1;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* ===== FORM ===== */
+        .pf-form-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .pf-form-ctrl {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-family: 'Nunito', sans-serif;
+            color: #1e293b;
+            background: #fff;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-form-ctrl:focus {
+                border-color: var(--amber);
+                box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+            }
+
+            .pf-form-ctrl:disabled {
+                background: #f8fafc;
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+
+        /* ===== BUTTONS ===== */
+        .pf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: all .13s;
+        }
+
+        .pf-btn-primary {
+            background: var(--amber);
+            color: #fff;
+        }
+
+            .pf-btn-primary:hover {
+                background: var(--amber2);
+            }
+
+        .pf-btn-danger {
+            background: rgba(239,68,68,.1);
+            color: #ef4444;
+            border: 1px solid rgba(239,68,68,.25);
+        }
+
+            .pf-btn-danger:hover {
+                background: rgba(239,68,68,.18);
+            }
+
+        .pf-btn-ghost {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+            .pf-btn-ghost:hover {
+                background: #e2e8f0;
+            }
+
+        /* ===== ALERT TOAST ===== */
+        .pf-alert {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .pf-alert.show {
+                display: flex;
+            }
+
+        .pf-alert-ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .pf-alert-err {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* password toggle */
+        .pf-pw-wrap {
+            position: relative;
+        }
+
+            .pf-pw-wrap .pf-form-ctrl {
+                padding-right: 40px;
+            }
+
+        .pf-pw-eye {
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 13px;
+            transition: color .1s;
+        }
+
+            .pf-pw-eye:hover {
+                color: var(--amber);
+            }
+
+        /* divider */
+        .pf-divider {
+            border: none;
+            border-top: 1px dashed var(--border);
+            margin: 16px 0;
+        }
+    </style>
+}
+
+<div class="pf-wrap">
+
+    <!-- ===== HERO ===== -->
+    <div class="pf-hero">
+        <div class="pf-avatar">@initials</div>
+        <div class="pf-hero-info">
+            <div class="pf-hero-name">@Model.FullName</div>
+            <div class="pf-hero-id">#@Model.Id</div>
+            <div>
+                <span class="pf-badge pf-badge-role">
+                    <i class="fa @roleIcon"></i>@roleName
+                </span>
+                <span class="pf-badge @(Model.IsActive ? "pf-badge-status-active" : "pf-badge-status-inactive")">
+                    <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>@statusText
+                </span>
+            </div>
+        </div>
+        <!-- ngày tạo góc phải -->
+        <div style="position:relative;z-index:1;text-align:right;flex-shrink:0">
+            <div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px">Ngày tạo tài khoản</div>
+            <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.7)">
+                @Model.CreatedAt.ToString("dd/MM/yyyy")
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="row g-3">
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#fef3c7">
+                    <i class="fa fa-receipt" style="color:var(--amber2)"></i>
+                </div>
+                <div>
+                    <div class="pf-stat-val">@(Model.Orders?.Count ?? 0)</div>
+                    <div class="pf-stat-lbl">Đơn hàng</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#d1fae5">
+                    <i class="fa fa-calendar-check" style="color:#10b981"></i>
+                </div>
+                <div>
+                    <div class="pf-stat-val">@((DateTime.Now - Model.CreatedAt).Days)</div>
+                    <div class="pf-stat-lbl">Ngày làm việc</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#dbeafe">
+                    <i class="fa fa-shield-halved" style="color:#3b82f6"></i>
+                </div>
+                <div>
+                    <div class="pf-stat-val" style="font-size:13px">@roleName</div>
+                    <div class="pf-stat-lbl">Vai trò</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 2 CỘT: THÔNG TIN + ĐỔI MẬT KHẨU ===== -->
+    <div class="row g-3 align-items-start">
+
+        <!-- CỘT TRÁI: Thông tin cá nhân (readonly) -->
+        <div class="col-6">
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-id-card" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Thông tin cá nhân</span>
+                </div>
+                <div class="pf-card-body">
+
+                    <div class="pf-alert pf-alert-ok" id="pf-info-ok">
+                        <i class="fa fa-circle-check"></i>Cập nhật thành công!
+                    </div>
+                    <div class="pf-alert pf-alert-err" id="pf-info-err">
+                        <i class="fa fa-triangle-exclamation"></i><span id="pf-info-err-msg">Có lỗi xảy ra</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-form-label"><i class="fa fa-user me-1"></i>Họ và tên</label>
+                        <input id="pf-fullname" class="pf-form-ctrl" type="text" value="@Model.FullName" placeholder="Họ và tên" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-form-label"><i class="fa fa-envelope me-1"></i>Email</label>
+                        <input class="pf-form-ctrl" type="email" value="@Model.Email" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-form-label"><i class="fa fa-phone me-1"></i>Số điện thoại</label>
+                        <input id="pf-phone" class="pf-form-ctrl" type="tel" value="@(Model.Phone ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="pf-form-label"><i class="fa fa-location-dot me-1"></i>Địa chỉ</label>
+                        <input id="pf-address" class="pf-form-ctrl" type="text" value="@(Model.Address ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+
+                    <button class="pf-btn pf-btn-primary w-100" onclick="pfSaveInfo()">
+                        <i class="fa fa-floppy-disk"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Đổi mật khẩu + info tài khoản -->
+        <div class="col-6 d-flex flex-column gap-3">
+
+            <!-- Đổi mật khẩu -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-lock" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Đổi mật khẩu</span>
+                </div>
+                <div class="pf-card-body">
+
+                    <div class="pf-alert pf-alert-ok" id="pf-pw-ok">
+                        <i class="fa fa-circle-check"></i>Đổi mật khẩu thành công!
+                    </div>
+                    <div class="pf-alert pf-alert-err" id="pf-pw-err">
+                        <i class="fa fa-triangle-exclamation"></i><span id="pf-pw-err-msg">Có lỗi xảy ra</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-form-label">Mật khẩu hiện tại</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-old" class="pf-form-ctrl" type="password" placeholder="Nhập mật khẩu hiện tại" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-old',this)"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-form-label">Mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-new" class="pf-form-ctrl" type="password" placeholder="Tối thiểu 6 ký tự" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-new',this)"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="pf-form-label">Xác nhận mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-cfm" class="pf-form-ctrl" type="password" placeholder="Nhập lại mật khẩu mới" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-cfm',this)"></i>
+                        </div>
+                    </div>
+
+                    <button class="pf-btn pf-btn-primary w-100" onclick="pfSavePw()">
+                        <i class="fa fa-key"></i>Xác nhận đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chi tiết tài khoản (readonly) -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-circle-info" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Chi tiết tài khoản</span>
+                </div>
+                <div class="pf-card-body" style="padding: 12px 20px;">
+
+                    <div class="pf-info-row">
+                        <div class="pf-info-icon"><i class="fa fa-hashtag"></i></div>
+                        <div>
+                            <div class="pf-info-lbl">Mã nhân viên</div>
+                            <div class="pf-info-val">@Model.Id</div>
+                        </div>
+                    </div>
+
+                    <div class="pf-info-row">
+                        <div class="pf-info-icon"><i class="fa fa-calendar"></i></div>
+                        <div>
+                            <div class="pf-info-lbl">Ngày tạo tài khoản</div>
+                            <div class="pf-info-val">@Model.CreatedAt.ToString("HH:mm - dd/MM/yyyy")</div>
+                        </div>
+                    </div>
+
+                    <div class="pf-info-row">
+                        <div class="pf-info-icon" style="background:#fce7f3;color:#db2777">
+                            <i class="fa @roleIcon"></i>
+                        </div>
+                        <div>
+                            <div class="pf-info-lbl">Vai trò</div>
+                            <div class="pf-info-val" style="color:@roleColor">@roleName</div>
+                        </div>
+                    </div>
+
+                    <div class="pf-info-row">
+                        <div class="pf-info-icon" style="background:@(Model.IsActive ? "#d1fae5" : "#fee2e2");color:@statusColor">
+                            <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                        </div>
+                        <div>
+                            <div class="pf-info-lbl">Trạng thái</div>
+                            <div class="pf-info-val" style="color:@statusColor">@statusText</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const PF_USER_ID = '@Model.Id';
+
+        /* ===== Toggle password visibility ===== */
+        function pfTogglePw(inputId, icon) {
+            const inp = document.getElementById(inputId);
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            icon.classList.toggle('fa-eye',      !show);
+            icon.classList.toggle('fa-eye-slash', show);
+        }
+
+        /* ===== Alert helpers ===== */
+        function pfShowOk(id) {
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        function pfShowErr(id, msgId, msg) {
+            document.getElementById(msgId).textContent = msg;
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        /* ===== Lưu thông tin cá nhân ===== */
+        function pfSaveInfo() {
+            const fullname = document.getElementById('pf-fullname').value.trim();
+            const phone    = document.getElementById('pf-phone').value.trim();
+            const address  = document.getElementById('pf-address').value.trim();
+
+            if (!fullname) {
+                pfShowErr('pf-info-err', 'pf-info-err-msg', 'Họ tên không được để trống!');
+                return;
+            }
+
+            fetch('/Account/UpdateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName: fullname, phone, address })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) pfShowOk('pf-info-ok');
+                else pfShowErr('pf-info-err', 'pf-info-err-msg', d.message || 'Cập nhật thất bại!');
+            })
+            .catch(() => pfShowErr('pf-info-err', 'pf-info-err-msg', 'Không thể kết nối server!'));
+        }
+
+        /* ===== Đổi mật khẩu ===== */
+        function pfSavePw() {
+            const oldPw = document.getElementById('pf-pw-old').value;
+            const newPw = document.getElementById('pf-pw-new').value;
+            const cfmPw = document.getElementById('pf-pw-cfm').value;
+
+            if (!oldPw || !newPw || !cfmPw) {
+                pfShowErr('pf-pw-err', 'pf-pw-err-msg', 'Vui lòng điền đầy đủ các trường!');
+                return;
+            }
+            if (newPw.length < 6) {
+                pfShowErr('pf-pw-err', 'pf-pw-err-msg', 'Mật khẩu mới phải từ 6 ký tự!');
+                return;
+            }
+            if (newPw !== cfmPw) {
+                pfShowErr('pf-pw-err', 'pf-pw-err-msg', 'Mật khẩu xác nhận không khớp!');
+                return;
+            }
+
+            fetch('/Account/ChangePassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    pfShowOk('pf-pw-ok');
+                    document.getElementById('pf-pw-old').value = '';
+                    document.getElementById('pf-pw-new').value = '';
+                    document.getElementById('pf-pw-cfm').value = '';
+                } else {
+                    pfShowErr('pf-pw-err', 'pf-pw-err-msg', d.message || 'Đổi mật khẩu thất bại!');
+                }
+            })
+            .catch(() => pfShowErr('pf-pw-err', 'pf-pw-err-msg', 'Không thể kết nối server!'));
+        }
+    </script>
+} *@
+@* @model Web_QuanLy_PolyCafe.Models.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var roleName = Model.Role ? "Quản trị viên" : "Nhân viên";
+    var roleColor = Model.Role ? "#f59e0b" : "#10b981";
+    var roleIcon = Model.Role ? "fa-crown" : "fa-user-tie";
+    var initials = string.IsNullOrEmpty(Model.FullName) ? "?"
+                      : string.Join("", Model.FullName.Trim().Split(' ').TakeLast(2).Select(w => w[0])).ToUpper();
+    var statusColor = Model.IsActive ? "#10b981" : "#ef4444";
+    var statusText = Model.IsActive ? "Đang hoạt động" : "Đã vô hiệu hoá";
+}
+
+@section HeadStyles {
+    <style>
+        .pf-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px 24px 32px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+            .pf-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pf-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        /* HERO */
+        .pf-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #273548 100%);
+            border-radius: 16px;
+            padding: 24px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.15);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+            .pf-hero::before {
+                content: '';
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                border: 30px solid rgba(245,158,11,.08);
+                top: -60px;
+                right: -40px;
+            }
+
+            .pf-hero::after {
+                content: '';
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: 20px solid rgba(245,158,11,.06);
+                bottom: -30px;
+                right: 80px;
+            }
+
+        .pf-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Playfair Display',serif;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,.2);
+            box-shadow: 0 4px 16px rgba(245,158,11,.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .pf-hero-info {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pf-hero-name {
+            font-family: 'Playfair Display',serif;
+            font-size: 19px;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pf-hero-id {
+            font-size: 11px;
+            color: rgba(255,255,255,.4);
+            margin-bottom: 9px;
+        }
+
+        .pf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1px solid;
+        }
+
+        .pf-badge-role {
+            background: rgba(245,158,11,.15);
+            color: #f59e0b;
+            border-color: rgba(245,158,11,.3);
+            margin-right: 6px;
+        }
+
+        .pf-badge-active {
+            background: rgba(16,185,129,.15);
+            color: #10b981;
+            border-color: rgba(16,185,129,.3);
+        }
+
+        .pf-badge-inactive {
+            background: rgba(239,68,68,.15);
+            color: #ef4444;
+            border-color: rgba(239,68,68,.3);
+        }
+
+        .pf-hero-date {
+            position: relative;
+            z-index: 1;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* STATS */
+        .pf-stat {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-stat:hover {
+                border-color: var(--amber);
+                box-shadow: 0 2px 10px rgba(245,158,11,.1);
+            }
+
+        .pf-stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .pf-stat-val {
+            font-family: 'Playfair Display',serif;
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pf-stat-lbl {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* CARD */
+        .pf-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+
+        .pf-card-head {
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pf-card-title {
+            font-family: 'Playfair Display',serif;
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .pf-card-body {
+            padding: 18px 20px;
+        }
+
+        /* FORM */
+        .pf-lbl {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .pf-ctrl {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-family: 'Nunito',sans-serif;
+            color: #1e293b;
+            background: #fff;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-ctrl:focus {
+                border-color: var(--amber);
+                box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+            }
+
+            .pf-ctrl:disabled {
+                background: #f8fafc;
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+
+        .pf-pw-wrap {
+            position: relative;
+        }
+
+            .pf-pw-wrap .pf-ctrl {
+                padding-right: 40px;
+            }
+
+        .pf-pw-eye {
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 13px;
+            transition: color .1s;
+        }
+
+            .pf-pw-eye:hover {
+                color: var(--amber);
+            }
+
+        /* BUTTON */
+        .pf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Nunito',sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: all .13s;
+        }
+
+        .pf-btn-amber {
+            background: var(--amber);
+            color: #fff;
+        }
+
+            .pf-btn-amber:hover {
+                background: var(--amber2);
+            }
+
+        /* ALERT */
+        .pf-alert {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .pf-alert.show {
+                display: flex;
+            }
+
+        .pf-alert-ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .pf-alert-err {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* INFO ROWS */
+        .pf-irow {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8fafc;
+            gap: 12px;
+        }
+
+            .pf-irow:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .pf-irow:first-child {
+                padding-top: 0;
+            }
+
+        .pf-iico {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: var(--amber2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .pf-ilbl {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .pf-ival {
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 700;
+            word-break: break-word;
+        }
+    </style>
+}
+
+<div class="pf-wrap">
+
+    <!-- HERO -->
+    <div class="pf-hero">
+        <div class="pf-avatar">@initials</div>
+        <div class="pf-hero-info">
+            <div class="pf-hero-name">@Model.FullName</div>
+            <div class="pf-hero-id">#@Model.Id</div>
+            <div>
+                <span class="pf-badge pf-badge-role"><i class="fa @roleIcon"></i>@roleName</span>
+                <span class="pf-badge @(Model.IsActive ? "pf-badge-active" : "pf-badge-inactive")">
+                    <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>@statusText
+                </span>
+            </div>
+        </div>
+        <div class="pf-hero-date">
+            <div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px">Ngày tạo tài khoản</div>
+            <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.7)">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-3">
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#fef3c7"><i class="fa fa-receipt" style="color:var(--amber2)"></i></div>
+                <div><div class="pf-stat-val">@(Model.Orders?.Count ?? 0)</div><div class="pf-stat-lbl">Đơn hàng</div></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#d1fae5"><i class="fa fa-calendar-check" style="color:#10b981"></i></div>
+                <div><div class="pf-stat-val">@((DateTime.Now - Model.CreatedAt).Days)</div><div class="pf-stat-lbl">Ngày làm việc</div></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#dbeafe"><i class="fa fa-shield-halved" style="color:#3b82f6"></i></div>
+                <div><div class="pf-stat-val" style="font-size:13px">@roleName</div><div class="pf-stat-lbl">Vai trò</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 CỘT -->
+    <div class="row g-3 align-items-start">
+
+        <!-- TRÁI: Thông tin cá nhân -->
+        <div class="col-6">
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-id-card" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Thông tin cá nhân</span>
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-alert pf-alert-ok" id="pf-info-ok"><i class="fa fa-circle-check"></i>Cập nhật thành công!</div>
+                    <div class="pf-alert pf-alert-err" id="pf-info-err"><i class="fa fa-triangle-exclamation"></i><span id="pf-info-err-msg"></span></div>
+
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-user me-1"></i>Họ và tên</label>
+                        <input id="pf-fullname" class="pf-ctrl" type="text" value="@Model.FullName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-envelope me-1"></i>Email</label>
+                        <input class="pf-ctrl" type="email" value="@Model.Email" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-phone me-1"></i>Số điện thoại</label>
+                        <input id="pf-phone" class="pf-ctrl" type="tel" value="@(Model.Phone ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="pf-lbl"><i class="fa fa-location-dot me-1"></i>Địa chỉ</label>
+                        <input id="pf-address" class="pf-ctrl" type="text" value="@(Model.Address ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+                    <button class="pf-btn pf-btn-amber w-100" onclick="pfSaveInfo()">
+                        <i class="fa fa-floppy-disk"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHẢI: Đổi MK + Chi tiết -->
+        <div class="col-6 d-flex flex-column gap-3">
+
+            <!-- Đổi mật khẩu — BỎ ô mật khẩu hiện tại -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-lock" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Đổi mật khẩu</span>
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-alert pf-alert-ok" id="pf-pw-ok"><i class="fa fa-circle-check"></i>Đổi mật khẩu thành công!</div>
+                    <div class="pf-alert pf-alert-err" id="pf-pw-err"><i class="fa fa-triangle-exclamation"></i><span id="pf-pw-err-msg"></span></div>
+
+                    <div class="mb-3">
+                        <label class="pf-lbl">Mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-new" class="pf-ctrl" type="password" placeholder="Tối thiểu 6 ký tự" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-new',this)"></i>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="pf-lbl">Xác nhận mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-cfm" class="pf-ctrl" type="password" placeholder="Nhập lại mật khẩu mới" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-cfm',this)"></i>
+                        </div>
+                    </div>
+                    <button class="pf-btn pf-btn-amber w-100" onclick="pfSavePw()">
+                        <i class="fa fa-key"></i>Xác nhận đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chi tiết tài khoản -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-circle-info" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Chi tiết tài khoản</span>
+                </div>
+                <div class="pf-card-body" style="padding:12px 20px">
+                    <div class="pf-irow">
+                        <div class="pf-iico"><i class="fa fa-hashtag"></i></div>
+                        <div><div class="pf-ilbl">Mã nhân viên</div><div class="pf-ival">@Model.Id</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico"><i class="fa fa-calendar"></i></div>
+                        <div><div class="pf-ilbl">Ngày tạo tài khoản</div><div class="pf-ival">@Model.CreatedAt.ToString("HH:mm - dd/MM/yyyy")</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico" style="background:#fce7f3;color:#db2777"><i class="fa @roleIcon"></i></div>
+                        <div><div class="pf-ilbl">Vai trò</div><div class="pf-ival" style="color:@roleColor">@roleName</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico" style="background:@(Model.IsActive ? "#d1fae5" : "#fee2e2");color:@statusColor">
+                            <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                        </div>
+                        <div><div class="pf-ilbl">Trạng thái</div><div class="pf-ival" style="color:@statusColor">@statusText</div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function pfTogglePw(id, icon) {
+            const inp = document.getElementById(id);
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            icon.classList.toggle('fa-eye',      !show);
+            icon.classList.toggle('fa-eye-slash', show);
+        }
+
+        function pfShowOk(id) {
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        function pfShowErr(id, msgId, msg) {
+            document.getElementById(msgId).textContent = msg;
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        function pfSaveInfo() {
+            const fullname = document.getElementById('pf-fullname').value.trim();
+            const phone    = document.getElementById('pf-phone').value.trim();
+            const address  = document.getElementById('pf-address').value.trim();
+
+            if (!fullname) { pfShowErr('pf-info-err','pf-info-err-msg','Họ tên không được để trống!'); return; }
+
+            fetch('/Account/UpdateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName: fullname, phone, address })
+            })
+            .then(r => r.json())
+            .then(d => d.success ? pfShowOk('pf-info-ok') : pfShowErr('pf-info-err','pf-info-err-msg', d.message || 'Cập nhật thất bại!'))
+            .catch(() => pfShowErr('pf-info-err','pf-info-err-msg','Không thể kết nối server!'));
+        }
+
+        function pfSavePw() {
+            const newPw = document.getElementById('pf-pw-new').value;
+            const cfmPw = document.getElementById('pf-pw-cfm').value;
+
+            if (!newPw || !cfmPw) { pfShowErr('pf-pw-err','pf-pw-err-msg','Vui lòng điền đầy đủ!'); return; }
+            if (newPw.length < 6)  { pfShowErr('pf-pw-err','pf-pw-err-msg','Mật khẩu mới phải từ 6 ký tự!'); return; }
+            if (newPw !== cfmPw)   { pfShowErr('pf-pw-err','pf-pw-err-msg','Mật khẩu xác nhận không khớp!'); return; }
+
+            fetch('/Account/ChangePassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword: '', newPassword: newPw })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    pfShowOk('pf-pw-ok');
+                    document.getElementById('pf-pw-new').value = '';
+                    document.getElementById('pf-pw-cfm').value = '';
+                } else {
+                    pfShowErr('pf-pw-err','pf-pw-err-msg', d.message || 'Đổi mật khẩu thất bại!');
+                }
+            })
+            .catch(() => pfShowErr('pf-pw-err','pf-pw-err-msg','Không thể kết nối server!'));
+        }
+    </script>
+} *@
+@model Web_QuanLy_PolyCafe.Models.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var roleName = Model.Role ? "Quản trị viên" : "Nhân viên";
+    var roleColor = Model.Role ? "#f59e0b" : "#10b981";
+    var roleIcon = Model.Role ? "fa-crown" : "fa-user-tie";
+    var initials = string.IsNullOrEmpty(Model.FullName) ? "?"
+                      : string.Join("", Model.FullName.Trim().Split(' ').TakeLast(2).Select(w => w[0])).ToUpper();
+    var statusColor = Model.IsActive ? "#10b981" : "#ef4444";
+    var statusText = Model.IsActive ? "Đang hoạt động" : "Đã vô hiệu hoá";
+}
+
+@section HeadStyles {
+    <style>
+        /* Ẩn sidebar hóa đơn khi ở trang Profile */
+        #pc-sidebar {
+            display: none !important;
+        }
+
+        #pc-bill-btn-wrap {
+            display: none !important;
+        }
+
+        .pc-bill-btn {
+            display: none !important;
+        }
+
+        .pf-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px 24px 32px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+            .pf-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pf-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        /* NÚT QUAY LẠI */
+        .pf-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 16px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .13s;
+            width: fit-content;
+        }
+
+            .pf-back-btn:hover {
+                border-color: var(--amber);
+                color: var(--amber2);
+                background: #fffbea;
+            }
+
+        /* HERO */
+        .pf-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #273548 100%);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.15);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+            .pf-hero::before {
+                content: '';
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                border: 30px solid rgba(245,158,11,.08);
+                top: -60px;
+                right: -40px;
+            }
+
+            .pf-hero::after {
+                content: '';
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: 20px solid rgba(245,158,11,.06);
+                bottom: -30px;
+                right: 80px;
+            }
+
+        .pf-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Playfair Display',serif;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,.2);
+            box-shadow: 0 4px 16px rgba(245,158,11,.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .pf-hero-info {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pf-hero-name {
+            font-family: 'Playfair Display',serif;
+            font-size: 19px;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pf-hero-id {
+            font-size: 11px;
+            color: rgba(255,255,255,.4);
+            margin-bottom: 9px;
+        }
+
+        .pf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1px solid;
+        }
+
+        .pf-badge-role {
+            background: rgba(245,158,11,.15);
+            color: #f59e0b;
+            border-color: rgba(245,158,11,.3);
+            margin-right: 6px;
+        }
+
+        .pf-badge-active {
+            background: rgba(16,185,129,.15);
+            color: #10b981;
+            border-color: rgba(16,185,129,.3);
+        }
+
+        .pf-badge-inactive {
+            background: rgba(239,68,68,.15);
+            color: #ef4444;
+            border-color: rgba(239,68,68,.3);
+        }
+
+        .pf-hero-date {
+            position: relative;
+            z-index: 1;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* STATS */
+        .pf-stat {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-stat:hover {
+                border-color: var(--amber);
+                box-shadow: 0 2px 10px rgba(245,158,11,.1);
+            }
+
+        .pf-stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .pf-stat-val {
+            font-family: 'Playfair Display',serif;
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pf-stat-lbl {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* CARD */
+        .pf-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+
+        .pf-card-head {
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pf-card-title {
+            font-family: 'Playfair Display',serif;
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .pf-card-body {
+            padding: 18px 20px;
+        }
+
+        /* FORM */
+        .pf-lbl {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .pf-ctrl {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-family: 'Nunito',sans-serif;
+            color: #1e293b;
+            background: #fff;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .pf-ctrl:focus {
+                border-color: var(--amber);
+                box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+            }
+
+            .pf-ctrl:disabled {
+                background: #f8fafc;
+                color: #64748b;
+                cursor: not-allowed;
+            }
+
+        .pf-pw-wrap {
+            position: relative;
+        }
+
+            .pf-pw-wrap .pf-ctrl {
+                padding-right: 40px;
+            }
+
+        .pf-pw-eye {
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 13px;
+            transition: color .1s;
+        }
+
+            .pf-pw-eye:hover {
+                color: var(--amber);
+            }
+
+        /* BUTTON */
+        .pf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Nunito',sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: all .13s;
+        }
+
+        .pf-btn-amber {
+            background: var(--amber);
+            color: #fff;
+        }
+
+            .pf-btn-amber:hover {
+                background: var(--amber2);
+            }
+
+        /* ALERT */
+        .pf-alert {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .pf-alert.show {
+                display: flex;
+            }
+
+        .pf-alert-ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .pf-alert-err {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* INFO ROWS */
+        .pf-irow {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8fafc;
+            gap: 12px;
+        }
+
+            .pf-irow:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .pf-irow:first-child {
+                padding-top: 0;
+            }
+
+        .pf-iico {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: var(--amber2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .pf-ilbl {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .pf-ival {
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 700;
+            word-break: break-word;
+        }
+    </style>
+}
+
+<div class="pf-wrap">
+
+    <!-- NÚT QUAY LẠI -->
+    <div>
+        <a href="/Order/POS" class="pf-back-btn">
+            <i class="fa fa-arrow-left"></i> Quay lại POS
+        </a>
+    </div>
+
+    <!-- HERO -->
+    <div class="pf-hero">
+        <div class="pf-avatar">@initials</div>
+        <div class="pf-hero-info">
+            <div class="pf-hero-name">@Model.FullName</div>
+            <div class="pf-hero-id">#@Model.Id</div>
+            <div>
+                <span class="pf-badge pf-badge-role"><i class="fa @roleIcon"></i>@roleName</span>
+                <span class="pf-badge @(Model.IsActive ? "pf-badge-active" : "pf-badge-inactive")">
+                    <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>@statusText
+                </span>
+            </div>
+        </div>
+        <div class="pf-hero-date">
+            <div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px">Ngày tạo tài khoản</div>
+            <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.7)">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-3">
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#fef3c7"><i class="fa fa-receipt" style="color:var(--amber2)"></i></div>
+                <div><div class="pf-stat-val">@(Model.Orders?.Count ?? 0)</div><div class="pf-stat-lbl">Đơn hàng</div></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#d1fae5"><i class="fa fa-calendar-check" style="color:#10b981"></i></div>
+                <div><div class="pf-stat-val">@((DateTime.Now - Model.CreatedAt).Days)</div><div class="pf-stat-lbl">Ngày làm việc</div></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="pf-stat">
+                <div class="pf-stat-icon" style="background:#dbeafe"><i class="fa fa-shield-halved" style="color:#3b82f6"></i></div>
+                <div><div class="pf-stat-val" style="font-size:13px">@roleName</div><div class="pf-stat-lbl">Vai trò</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 CỘT -->
+    <div class="row g-3 align-items-start">
+
+        <!-- TRÁI: Thông tin cá nhân -->
+        <div class="col-6">
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-id-card" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Thông tin cá nhân</span>
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-alert pf-alert-ok" id="pf-info-ok"><i class="fa fa-circle-check"></i>Cập nhật thành công!</div>
+                    <div class="pf-alert pf-alert-err" id="pf-info-err"><i class="fa fa-triangle-exclamation"></i><span id="pf-info-err-msg"></span></div>
+
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-user me-1"></i>Họ và tên</label>
+                        <input id="pf-fullname" class="pf-ctrl" type="text" value="@Model.FullName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-envelope me-1"></i>Email</label>
+                        <input class="pf-ctrl" type="email" value="@Model.Email" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="pf-lbl"><i class="fa fa-phone me-1"></i>Số điện thoại</label>
+                        <input id="pf-phone" class="pf-ctrl" type="tel" value="@(Model.Phone ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="pf-lbl"><i class="fa fa-location-dot me-1"></i>Địa chỉ</label>
+                        <input id="pf-address" class="pf-ctrl" type="text" value="@(Model.Address ?? "")" placeholder="Chưa cập nhật" />
+                    </div>
+                    <button class="pf-btn pf-btn-amber w-100" onclick="pfSaveInfo()">
+                        <i class="fa fa-floppy-disk"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHẢI: Đổi MK + Chi tiết -->
+        <div class="col-6 d-flex flex-column gap-3">
+
+            <!-- Đổi mật khẩu -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-lock" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Đổi mật khẩu</span>
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-alert pf-alert-ok" id="pf-pw-ok"><i class="fa fa-circle-check"></i>Đổi mật khẩu thành công!</div>
+                    <div class="pf-alert pf-alert-err" id="pf-pw-err"><i class="fa fa-triangle-exclamation"></i><span id="pf-pw-err-msg"></span></div>
+
+                    <!-- Mật khẩu hiện tại — hiện luôn nhưng disabled -->
+                    <div class="mb-3">
+                        <label class="pf-lbl">Mật khẩu hiện tại</label>
+                        <div class="pf-pw-wrap">
+                            <input class="pf-ctrl" type="text" value="@Model.Password" disabled />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="pf-lbl">Mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-new" class="pf-ctrl" type="password" placeholder="Tối thiểu 6 ký tự" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-new',this)"></i>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="pf-lbl">Xác nhận mật khẩu mới</label>
+                        <div class="pf-pw-wrap">
+                            <input id="pf-pw-cfm" class="pf-ctrl" type="password" placeholder="Nhập lại mật khẩu mới" />
+                            <i class="fa fa-eye pf-pw-eye" onclick="pfTogglePw('pf-pw-cfm',this)"></i>
+                        </div>
+                    </div>
+                    <button class="pf-btn pf-btn-amber w-100" onclick="pfSavePw()">
+                        <i class="fa fa-key"></i>Xác nhận đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chi tiết tài khoản -->
+            <div class="pf-card">
+                <div class="pf-card-head">
+                    <i class="fa fa-circle-info" style="color:var(--amber)"></i>
+                    <span class="pf-card-title">Chi tiết tài khoản</span>
+                </div>
+                <div class="pf-card-body" style="padding:12px 20px">
+                    <div class="pf-irow">
+                        <div class="pf-iico"><i class="fa fa-hashtag"></i></div>
+                        <div><div class="pf-ilbl">Mã nhân viên</div><div class="pf-ival">@Model.Id</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico"><i class="fa fa-calendar"></i></div>
+                        <div><div class="pf-ilbl">Ngày tạo tài khoản</div><div class="pf-ival">@Model.CreatedAt.ToString("HH:mm - dd/MM/yyyy")</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico" style="background:#fce7f3;color:#db2777"><i class="fa @roleIcon"></i></div>
+                        <div><div class="pf-ilbl">Vai trò</div><div class="pf-ival" style="color:@roleColor">@roleName</div></div>
+                    </div>
+                    <div class="pf-irow">
+                        <div class="pf-iico" style="background:@(Model.IsActive ? "#d1fae5" : "#fee2e2");color:@statusColor">
+                            <i class="fa @(Model.IsActive ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                        </div>
+                        <div><div class="pf-ilbl">Trạng thái</div><div class="pf-ival" style="color:@statusColor">@statusText</div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        /* Ẩn sidebar hóa đơn ngay khi DOM sẵn sàng */
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('pc-sidebar');
+            const billBtn = document.querySelector('.pc-bill-btn');
+            if (sidebar) sidebar.style.display = 'none';
+            if (billBtn) billBtn.style.display = 'none';
+        });
+
+        function pfTogglePw(id, icon) {
+            const inp = document.getElementById(id);
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            icon.classList.toggle('fa-eye',      !show);
+            icon.classList.toggle('fa-eye-slash', show);
+        }
+
+        function pfShowOk(id) {
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        function pfShowErr(id, msgId, msg) {
+            document.getElementById(msgId).textContent = msg;
+            const el = document.getElementById(id);
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        function pfSaveInfo() {
+            const fullname = document.getElementById('pf-fullname').value.trim();
+            const phone    = document.getElementById('pf-phone').value.trim();
+            const address  = document.getElementById('pf-address').value.trim();
+
+            if (!fullname) { pfShowErr('pf-info-err','pf-info-err-msg','Họ tên không được để trống!'); return; }
+
+            fetch('/Account/UpdateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName: fullname, phone, address })
+            })
+            .then(r => r.json())
+            .then(d => d.success ? pfShowOk('pf-info-ok') : pfShowErr('pf-info-err','pf-info-err-msg', d.message || 'Cập nhật thất bại!'))
+            .catch(() => pfShowErr('pf-info-err','pf-info-err-msg','Không thể kết nối server!'));
+        }
+
+        function pfSavePw() {
+            const newPw = document.getElementById('pf-pw-new').value;
+            const cfmPw = document.getElementById('pf-pw-cfm').value;
+
+            if (!newPw || !cfmPw) { pfShowErr('pf-pw-err','pf-pw-err-msg','Vui lòng điền đầy đủ!'); return; }
+            if (newPw.length < 6)  { pfShowErr('pf-pw-err','pf-pw-err-msg','Mật khẩu mới phải từ 6 ký tự!'); return; }
+            if (newPw !== cfmPw)   { pfShowErr('pf-pw-err','pf-pw-err-msg','Mật khẩu xác nhận không khớp!'); return; }
+
+            fetch('/Account/ChangePassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword: '', newPassword: newPw })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    pfShowOk('pf-pw-ok');
+                    document.getElementById('pf-pw-new').value = '';
+                    document.getElementById('pf-pw-cfm').value = '';
+                } else {
+                    pfShowErr('pf-pw-err','pf-pw-err-msg', d.message || 'Đổi mật khẩu thất bại!');
+                }
+            })
+            .catch(() => pfShowErr('pf-pw-err','pf-pw-err-msg','Không thể kết nối server!'));
+        }
+    </script>
+}
+

@@ -1,0 +1,3950 @@
+﻿@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món - PolyCafe POS";
+    Layout = null; // Full-screen POS, không dùng layout mặc định
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category> ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+    var vouchers = ViewBag.Vouchers as IEnumerable<Web_QuanLy_PolyCafe.Models.Voucher> ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Voucher>();
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --amber: #f59e0b;
+            --amber2: #d97706;
+            --green: #10b981;
+            --red: #ef4444;
+            --sb: #1e293b;
+            --sb2: #273548;
+            --bg: #f1f5f9;
+            --cream: #fef3c7;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; font-family: 'Nunito', sans-serif; background: var(--bg); }
+
+        /* === TOPBAR === */
+        .topbar {
+            height: 54px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 100;
+        }
+        .logo-box { width: 34px; height: 34px; background: var(--amber); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+        .brand-name { font-family: 'Playfair Display', serif; font-size: 16px; color: #1e293b; }
+        .pos-tag { background: var(--cream); color: var(--amber2); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+        .clock-box { background: var(--bg); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #1e293b; }
+        .staff-box { background: var(--bg); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #1e293b; }
+        .staff-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; }
+        .bill-toggle-btn {
+            background: #1e293b; color: #fff; border: none; border-radius: 9px;
+            padding: 6px 14px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif;
+            display: flex; align-items: center; gap: 7px; cursor: pointer; transition: background .15s; position: relative;
+        }
+        .bill-toggle-btn:hover { background: #334155; }
+        .bill-badge {
+            background: var(--amber); color: #fff; font-size: 9px; font-weight: 800;
+            width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            position: absolute; top: -5px; right: -5px;
+        }
+
+        /* === LAYOUT === */
+        .app-body { height: calc(100vh - 54px); display: flex; overflow: hidden; }
+        .left-col { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
+        .toolbar-wrap { background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; padding: 9px 14px; }
+        .search-wrap { position: relative; }
+        .search-wrap input {
+            width: 100%; padding: 8px 12px 8px 36px; border: 1.5px solid var(--border);
+            border-radius: 9px; font-size: 13px; font-family: 'Nunito', sans-serif; color: #1e293b;
+            background: var(--bg); outline: none; transition: all .15s;
+        }
+        .search-wrap input:focus { border-color: var(--amber); background: #fff; }
+        .search-wrap .fa { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; }
+
+        /* === CATEGORY BAR === */
+        .cat-bar {
+            background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0;
+            padding: 8px 14px; display: flex; gap: 6px; overflow-x: auto;
+        }
+        .cat-bar::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            border: 1.5px solid var(--border); background: #fff; border-radius: 20px;
+            padding: 5px 14px; font-size: 12px; font-weight: 700; color: #64748b;
+            cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif;
+            transition: all .13s; display: flex; align-items: center; gap: 5px;
+        }
+        .cat-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+        .cat-btn:hover:not(.active) { border-color: var(--amber); color: var(--amber2); }
+
+        /* === PRODUCT GRID === */
+        .product-scroll { flex: 1; overflow-y: scroll !important; -webkit-overflow-scrolling: touch; padding: 12px 14px; }
+        .product-scroll::-webkit-scrollbar { width: 5px; }
+        .product-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .p-card {
+            background: #fff; border-radius: 12px; border: 2px solid transparent;
+            cursor: pointer; transition: all .15s; box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden; position: relative; height: 100%;
+        }
+        .p-card:hover { border-color: var(--amber); box-shadow: 0 4px 14px rgba(245,158,11,.15); transform: translateY(-1px); }
+        .p-card:active { transform: scale(.97); }
+        .p-img { height: 72px; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; }
+        .p-tag { position: absolute; top: 6px; right: 6px; background: var(--amber); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 14px; }
+        .p-qty-badge {
+            position: absolute; top: 5px; left: 5px; background: var(--green); color: #fff;
+            font-size: 9px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .p-body { padding: 7px 9px 9px; }
+        .p-name { font-size: 12px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
+        .p-desc { font-size: 10px; color: #94a3b8; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .p-price { font-size: 13px; font-weight: 800; color: var(--amber2); }
+        .p-add-btn {
+            width: 23px; height: 23px; background: #1e293b; color: #fff; border: none;
+            border-radius: 7px; font-size: 13px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background .12s; flex-shrink: 0;
+        }
+        .p-add-btn:hover { background: var(--amber); }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 285px; background: var(--sb); display: flex; flex-direction: column;
+            flex-shrink: 0; overflow: hidden; transition: width .35s cubic-bezier(.4,0,.2,1);
+        }
+        .sidebar.hidden { width: 0; }
+        .sb-inner { display: flex; flex-direction: column; height: 100%; min-width: 285px; }
+        .sb-head { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.08); flex-shrink: 0; }
+        .sb-title { font-family: 'Playfair Display', serif; color: #fff; font-size: 15px; }
+        .sb-num { background: var(--amber); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 16px; }
+
+        .order-scroll {
+            flex: 1; overflow-y: scroll !important; -webkit-overflow-scrolling: touch;
+            padding: 8px; display: flex; flex-direction: column; gap: 5px; min-height: 0;
+        }
+        .order-scroll::-webkit-scrollbar { width: 3px; }
+        .order-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 2px; }
+
+        .empty-bill { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: rgba(255,255,255,.18); font-size: 12px; padding: 40px 0; flex: 1; }
+        .empty-bill i { font-size: 32px; opacity: .15; }
+
+        .oi {
+            background: var(--sb2); border: 1px solid rgba(255,255,255,.07); border-radius: 9px;
+            padding: 9px 10px; display: flex; align-items: center; gap: 8px;
+            animation: up .2s ease;
+        }
+        @@keyframes up { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .oi:hover { border-color: rgba(245,158,11,.3); }
+        .oi-em { width: 30px; height: 30px; border-radius: 8px; background: #fff1; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .oi-name { color: #fff; font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .oi-sub { color: rgba(255,255,255,.4); font-size: 10px; }
+        .oi-price { color: var(--amber); font-size: 10px; font-weight: 600; margin-top: 1px; }
+
+        .qbtn {
+            width: 20px; height: 20px; border: 1px solid rgba(255,255,255,.12); background: transparent;
+            color: rgba(255,255,255,.6); border-radius: 5px; cursor: pointer; font-size: 12px;
+            display: flex; align-items: center; justify-content: center; transition: all .1s;
+        }
+        .qbtn:hover { background: var(--amber); border-color: var(--amber); color: #fff; }
+        .qnum { color: #fff; font-size: 12px; font-weight: 800; min-width: 16px; text-align: center; }
+        .del-btn { background: transparent; border: none; color: rgba(255,80,80,.4); cursor: pointer; font-size: 14px; padding: 0 2px; transition: color .1s; }
+        .del-btn:hover { color: var(--red); }
+
+        /* === FOOTER === */
+        .sb-foot { padding: 11px 13px; border-top: 1px solid rgba(255,255,255,.08); flex-shrink: 0; }
+        .coup-in {
+            background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 7px;
+            padding: 7px 9px; color: #fff; font-size: 11px; outline: none;
+            font-family: 'Nunito', sans-serif; flex: 1;
+        }
+        .coup-in::placeholder { color: rgba(255,255,255,.22); }
+        .coup-in:focus { border-color: var(--amber); }
+        .coup-btn {
+            background: transparent; border: 1px solid var(--amber); color: var(--amber);
+            border-radius: 7px; padding: 7px 10px; font-size: 11px; font-weight: 800;
+            cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap;
+        }
+        .coup-btn:hover { background: var(--amber); color: #fff; }
+
+        .row-sum { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
+        .lbl { color: rgba(255,255,255,.38); font-size: 11px; }
+        .val { color: rgba(255,255,255,.72); font-size: 11px; font-weight: 600; }
+        .val-disc { color: var(--green); font-size: 11px; font-weight: 700; }
+        .sep { border: none; border-top: 1px dashed rgba(255,255,255,.1); margin: 5px 0; }
+        .grand-lbl { color: #fff; font-size: 13px; font-weight: 800; }
+        .grand-val { font-family: 'Playfair Display', serif; color: var(--amber); font-size: 20px; }
+
+        .btn-pay {
+            background: var(--amber); border: none; border-radius: 9px; color: #fff;
+            font-size: 13px; font-weight: 800; font-family: 'Nunito', sans-serif; padding: 11px;
+            transition: background .13s; display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .btn-pay:hover { background: var(--amber2); }
+        .btn-cancel {
+            background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.22); border-radius: 9px;
+            color: #f87171; font-size: 11px; font-weight: 700; font-family: 'Nunito', sans-serif;
+            padding: 11px 13px; display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-cancel:hover { background: rgba(239,68,68,.2); }
+
+        /* === TOAST === */
+        .toast-pos { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; }
+        .toast-inner {
+            background: #1e293b; color: #fff; padding: 9px 18px; border-radius: 30px;
+            font-size: 12px; font-weight: 700; box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            white-space: nowrap; opacity: 0; transition: all .25s; transform: translateY(8px);
+        }
+        .toast-pos.show .toast-inner { opacity: 1; transform: translateY(0); }
+
+        /* === MODALS === */
+        .modal-content { border-radius: 18px; border: none; box-shadow: 0 16px 50px rgba(0,0,0,.16); }
+        .m-title { font-family: 'Playfair Display', serif; font-size: 19px; color: #1e293b; text-align: center; }
+        .m-amount { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 800; color: var(--amber2); text-align: center; }
+        .pay-opt {
+            border: 2px solid var(--border); border-radius: 12px; padding: 12px 6px;
+            text-align: center; cursor: pointer; font-size: 12px; font-weight: 700; color: #64748b;
+            transition: all .13s; font-family: 'Nunito', sans-serif;
+        }
+        .pay-opt:hover { border-color: var(--amber); color: var(--amber2); }
+        .pay-opt.active { border-color: var(--amber); background: var(--cream); color: var(--amber2); }
+        .pay-icon { font-size: 22px; margin-bottom: 5px; }
+        .btn-confirm {
+            background: var(--amber); border: none; border-radius: 9px; color: #fff;
+            font-size: 13px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            padding: 11px 20px; display: flex; align-items: center; gap: 7px; transition: background .13s;
+        }
+        .btn-confirm:hover { background: var(--amber2); }
+        .btn-back {
+            background: #f1f5f9; border: none; border-radius: 9px; color: #64748b;
+            font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; padding: 11px 16px;
+        }
+
+        /* === VARIANT MODAL === */
+        .variant-item {
+            border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px;
+            cursor: pointer; transition: all .13s; font-size: 12px; font-weight: 700; color: #64748b;
+        }
+        .variant-item:hover, .variant-item.selected { border-color: var(--amber); background: var(--cream); color: var(--amber2); }
+        .no-variant-btn {
+            border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px;
+            cursor: pointer; transition: all .13s; font-size: 12px; font-weight: 700; color: #64748b;
+            background: #fff; width: 100%; text-align: left;
+        }
+        .no-variant-btn:hover { border-color: #94a3b8; }
+
+        /* === SUCCESS === */
+        .success-icon { width: 60px; height: 60px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar d-flex align-items-center justify-content-between px-3">
+        <div class="d-flex align-items-center gap-2">
+            <div class="logo-box">☕</div>
+            <span class="brand-name">PolyCafe</span>
+            <span class="pos-tag">POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="clock-box d-flex align-items-center gap-2">
+                <i class="fa fa-clock" style="color:var(--amber)"></i>
+                <span id="clock">--:--:--</span>
+            </div>
+            <div class="staff-box d-flex align-items-center gap-2">
+                <span class="staff-dot"></span>
+                <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
+                Nhân viên
+            </div>
+            <button class="bill-toggle-btn" onclick="toggleBill()">
+                <i class="fa fa-receipt"></i>Hóa đơn
+                <span class="bill-badge" id="bill-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== BODY ===== -->
+    <div class="app-body">
+
+        <!-- ===== LEFT: MENU ===== -->
+        <div class="left-col" id="left-col">
+            <div class="toolbar-wrap">
+                <div class="search-wrap">
+                    <i class="fa fa-magnifying-glass"></i>
+                    <input id="search" placeholder="Tìm kiếm món..." oninput="filterCards()" />
+                </div>
+            </div>
+
+            <!-- Category Bar -->
+            <div class="cat-bar" id="cat-bar">
+                <button class="cat-btn active" data-cat="all" onclick="setCategory(this)">
+                    <i class="fa fa-border-all"></i>Tất cả
+                </button>
+                @foreach (var cat in categories)
+                {
+                    <button class="cat-btn" data-cat="@cat.Id" onclick="setCategory(this)">
+                        <i class="fa fa-mug-hot"></i>@cat.Name
+                    </button>
+                }
+            </div>
+
+            <!-- Product Grid -->
+            <div class="product-scroll">
+                <div class="row g-2" id="product-grid">
+                    @foreach (var drink in Model)
+                    {
+                        var hasVariants = drink.DrinkVariants != null && drink.DrinkVariants.Any();
+                        var variantsJson = hasVariants
+                        ? System.Text.Json.JsonSerializer.Serialize(drink.DrinkVariants!.Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice }))
+                        : "[]";
+
+                        <div class="col-3 p-col"
+                             data-cat="@drink.CategoryId"
+                             data-name="@drink.Name.ToLower()"
+                             data-desc="@(drink.Description?.ToLower() ?? "")">
+                            <div class="p-card"
+                                 onclick="cardClick('@drink.Id','@drink.Name',@drink.Price,'@(drink.Description ?? "")',@variantsJson)"
+                                 id="card-@drink.Id">
+                                <div class="p-img" style="background:#fef3c7">
+                                    ☕
+                                    <span class="p-qty-badge" id="badge-@drink.Id" style="display:none">0</span>
+                                </div>
+                                <div class="p-body">
+                                    <div class="p-name">@drink.Name</div>
+                                    <div class="p-desc">@drink.Description</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="p-price">@drink.Price.ToString("N0")đ</span>
+                                        <button class="p-add-btn"
+                                                onclick="event.stopPropagation();cardClick('@drink.Id','@drink.Name',@drink.Price,'@(drink.Description ?? "")',@variantsJson)">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RIGHT: BILL SIDEBAR ===== -->
+        <div class="sidebar" id="sb">
+            <div class="sb-inner">
+                <div class="sb-head d-flex justify-content-between align-items-center">
+                    <span class="sb-title"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Hóa Đơn</span>
+                    <span class="sb-num" id="onum">#001</span>
+                </div>
+
+                <div class="order-scroll" id="olist">
+                    <div class="empty-bill" id="empty-bill">
+                        <i class="fa fa-cart-shopping"></i>Chưa có món nào
+                    </div>
+                </div>
+
+                <div class="sb-foot">
+                    <div class="d-flex gap-2 mb-2">
+                        <input class="coup-in" id="coup" placeholder="Nhập mã khuyến mãi..." />
+                        <button class="coup-btn" onclick="apCoup()"><i class="fa fa-tag me-1"></i>Áp</button>
+                    </div>
+                    <div class="row-sum"><span class="lbl">Tạm tính</span><span class="val" id="sub">0đ</span></div>
+                    <div class="row-sum" id="drow" style="display:none">
+                        <span class="lbl"><i class="fa fa-percent me-1" style="color:var(--green)"></i><span id="dlbl">Giảm giá</span></span>
+                        <span class="val-disc" id="dval">−0đ</span>
+                    </div>
+                    <hr class="sep" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="grand-lbl">Tổng tiền</span>
+                        <span class="grand-val" id="tot">0đ</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn-pay flex-fill" onclick="openPayModal()">
+                            <i class="fa fa-credit-card"></i> Thanh Toán
+                        </button>
+                        <button class="btn-cancel" onclick="clrAll()">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-pos" id="toast-pos">
+        <div class="toast-inner" id="toast-inner"></div>
+    </div>
+
+    <!-- ===== VARIANT MODAL ===== -->
+    <div class="modal fade" id="variantModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="m-title mb-1">
+                    <i class="fa fa-sliders me-2" style="color:var(--amber)"></i>
+                    <span id="vm-name">Chọn tùy chọn</span>
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">
+                    Giá gốc: <span id="vm-baseprice" style="color:var(--amber2);font-weight:700"></span>
+                </div>
+                <div id="vm-variants" class="d-flex flex-column gap-2 mb-3"></div>
+                <div class="d-flex gap-2">
+                    <button class="btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="btn-confirm flex-fill" onclick="confirmVariant()">
+                        <i class="fa fa-plus me-1"></i>Thêm vào đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PAYMENT MODAL ===== -->
+    <div class="modal fade" id="payModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="m-title mb-1">
+                    <i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Thanh toán
+                </div>
+                <div class="text-center text-muted mb-3" style="font-size:12px;">Chọn phương thức thanh toán</div>
+                <div class="m-amount mb-3" id="ma">0đ</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <div class="pay-opt active" onclick="selPay(this)" data-method="cash">
+                            <div class="pay-icon"><i class="fa fa-money-bill-wave" style="color:#22c55e"></i></div>
+                            Tiền mặt
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pay-opt" onclick="selPay(this)" data-method="transfer">
+                            <div class="pay-icon"><i class="fa fa-qrcode" style="color:#3b82f6"></i></div>
+                            Chuyển khoản
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="pay-opt" onclick="selPay(this)" data-method="voucher">
+                            <div class="pay-icon"><i class="fa fa-gift" style="color:#f59e0b"></i></div>
+                            Voucher
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-back" data-bs-dismiss="modal"><i class="fa fa-arrow-left me-1"></i>Quay lại</button>
+                    <button class="btn-confirm flex-fill" onclick="confirmPayment()">
+                        <i class="fa fa-check me-1"></i>Xác nhận thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUCCESS MODAL ===== -->
+    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content p-4 text-center">
+                <div class="success-icon mb-3"><i class="fa fa-check"></i></div>
+                <div class="m-title mb-1">Thanh toán thành công!</div>
+                <div class="text-muted mb-1" style="font-size:12px;">Mã đơn hàng</div>
+                <div style="font-size:16px;font-weight:800;color:var(--amber2)" id="success-orderId"></div>
+                <div class="text-muted mt-1" style="font-size:12px;">Tổng: <span id="success-total" style="color:var(--green);font-weight:700"></span></div>
+                <button class="btn-confirm w-100 mt-3 justify-content-center" onclick="closeSuccess()">
+                    <i class="fa fa-plus me-1"></i>Đơn mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========== STATE ==========
+        let cart = {}; // { key: { drinkId, variantId, name, variantName, price, qty } }
+        let discount = 0;
+        let discountType = '';
+        let discountValue = 0;
+        let voucherCode = '';
+        let orderCount = 1;
+        let billVisible = true;
+
+        // Pending variant selection
+        let pendingDrink = null;
+        let selectedVariantId = null;
+        let selectedVariantExtra = 0;
+        let selectedVariantName = '';
+
+        const bsVariantModal = new bootstrap.Modal(document.getElementById('variantModal'));
+        const bsPayModal = new bootstrap.Modal(document.getElementById('payModal'));
+        const bsSuccessModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+        // ========== CATEGORY FILTER ==========
+        function setCategory(btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterCards();
+        }
+
+        function filterCards() {
+            const q = document.getElementById('search').value.toLowerCase();
+            const activeCat = document.querySelector('.cat-btn.active')?.dataset.cat || 'all';
+            document.querySelectorAll('.p-col').forEach(col => {
+                const matchCat = activeCat === 'all' || col.dataset.cat === activeCat;
+                const matchQ = col.dataset.name.includes(q) || col.dataset.desc.includes(q);
+                col.style.display = (matchCat && matchQ) ? '' : 'none';
+            });
+        }
+
+        // ========== ADD TO CART ==========
+        function cardClick(id, name, price, desc, variants) {
+            if (variants && variants.length > 0) {
+                openVariantModal(id, name, price, variants);
+            } else {
+                addToCart(id, null, name, null, price);
+            }
+            if (!billVisible) {
+                billVisible = true;
+                document.getElementById('sb').classList.remove('hidden');
+            }
+        }
+
+        function openVariantModal(id, name, price, variants) {
+            pendingDrink = { id, name, price, variants };
+            selectedVariantId = null;
+            selectedVariantExtra = 0;
+            selectedVariantName = '';
+
+            document.getElementById('vm-name').textContent = name;
+            document.getElementById('vm-baseprice').textContent = price.toLocaleString('vi') + 'đ';
+
+            const container = document.getElementById('vm-variants');
+            container.innerHTML = '';
+
+            // No variant option
+            const noVar = document.createElement('div');
+            noVar.className = 'no-variant-btn';
+            noVar.innerHTML = `<i class="fa fa-circle-dot me-2" style="color:#94a3b8"></i>Mặc định — <b>${price.toLocaleString('vi')}đ</b>`;
+            noVar.onclick = () => {
+                container.querySelectorAll('.variant-item').forEach(x => x.classList.remove('selected'));
+                noVar.style.borderColor = 'var(--amber)';
+                noVar.style.background = 'var(--cream)';
+                selectedVariantId = null;
+                selectedVariantExtra = 0;
+                selectedVariantName = '';
+            };
+            container.appendChild(noVar);
+
+            variants.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'variant-item d-flex justify-content-between';
+                el.innerHTML = `<span>${v.name}</span><span style="color:var(--amber2);font-weight:800">+${v.extra.toLocaleString('vi')}đ → ${(price + v.extra).toLocaleString('vi')}đ</span>`;
+                el.onclick = () => {
+                    container.querySelectorAll('.variant-item').forEach(x => x.classList.remove('selected'));
+                    noVar.style.borderColor = '';
+                    noVar.style.background = '';
+                    el.classList.add('selected');
+                    selectedVariantId = v.id;
+                    selectedVariantExtra = v.extra;
+                    selectedVariantName = v.name;
+                };
+                container.appendChild(el);
+            });
+
+            bsVariantModal.show();
+        }
+
+        function confirmVariant() {
+            if (!pendingDrink) return;
+            const finalPrice = pendingDrink.price + selectedVariantExtra;
+            addToCart(pendingDrink.id, selectedVariantId, pendingDrink.name, selectedVariantName, finalPrice);
+            bsVariantModal.hide();
+            pendingDrink = null;
+        }
+
+        function addToCart(drinkId, variantId, name, variantName, price) {
+            const key = drinkId + (variantId || '');
+            if (!cart[key]) {
+                cart[key] = { drinkId, variantId, name, variantName, price, qty: 0 };
+            }
+            cart[key].qty++;
+            renderCart();
+            updateBadge(drinkId);
+            toast('<i class="fa fa-check me-1"></i>' + name + (variantName ? ' (' + variantName + ')' : ''));
+            recalcDiscount();
+        }
+
+        function changeQty(key, delta) {
+            if (!cart[key]) return;
+            cart[key].qty += delta;
+            if (cart[key].qty <= 0) {
+                delete cart[key];
+            }
+            renderCart();
+            recalcAllBadges();
+            recalcDiscount();
+        }
+
+        function removeItem(key) {
+            delete cart[key];
+            renderCart();
+            recalcAllBadges();
+            recalcDiscount();
+        }
+
+        // ========== RENDER CART ==========
+        function renderCart() {
+            const items = Object.entries(cart);
+            const list = document.getElementById('olist');
+
+            if (!items.length) {
+                list.innerHTML = '<div class="empty-bill"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>';
+                updateTotal();
+                return;
+            }
+
+            list.innerHTML = items.map(([key, item]) => `
+                <div class="oi">
+                    <div class="oi-em">☕</div>
+                    <div class="flex-fill" style="min-width:0">
+                        <div class="oi-name">${item.name}</div>
+                        ${item.variantName ? `<div class="oi-sub">${item.variantName}</div>` : ''}
+                        <div class="oi-price">${(item.price * item.qty).toLocaleString('vi')}đ</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="qbtn" onclick="changeQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                        <span class="qnum">${item.qty}</span>
+                        <button class="qbtn" onclick="changeQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <button class="del-btn" onclick="removeItem('${key}')"><i class="fa fa-xmark"></i></button>
+                </div>
+            `).join('');
+
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const subtotal = Object.values(cart).reduce((a, i) => a + i.price * i.qty, 0);
+            document.getElementById('sub').textContent = subtotal.toLocaleString('vi') + 'đ';
+            document.getElementById('tot').textContent = Math.max(0, subtotal - discount).toLocaleString('vi') + 'đ';
+        }
+
+        function updateBadge(drinkId) {
+            const total = Object.entries(cart)
+                .filter(([k]) => k.startsWith(drinkId))
+                .reduce((a, [, v]) => a + v.qty, 0);
+            const badge = document.getElementById('badge-' + drinkId);
+            if (badge) {
+                if (total > 0) { badge.style.display = 'flex'; badge.textContent = total; }
+                else badge.style.display = 'none';
+            }
+        }
+
+        function recalcAllBadges() {
+            document.querySelectorAll('[id^="badge-"]').forEach(b => {
+                const drinkId = b.id.replace('badge-', '');
+                updateBadge(drinkId);
+            });
+        }
+
+        function updBadge() {
+            const t = Object.values(cart).reduce((a, i) => a + i.qty, 0);
+            const b = document.getElementById('bill-badge');
+            if (t > 0) { b.style.display = 'flex'; b.textContent = t; }
+            else b.style.display = 'none';
+        }
+
+        function renderCart() {
+            const items = Object.entries(cart);
+            const list = document.getElementById('olist');
+            if (!items.length) {
+                list.innerHTML = '<div class="empty-bill"><i class="fa fa-cart-shopping"></i>Chưa có món nào</div>';
+            } else {
+                list.innerHTML = items.map(([key, item]) => `
+                    <div class="oi">
+                        <div class="oi-em">☕</div>
+                        <div class="flex-fill" style="min-width:0">
+                            <div class="oi-name">${item.name}</div>
+                            ${item.variantName ? `<div class="oi-sub">${item.variantName}</div>` : ''}
+                            <div class="oi-price">${(item.price * item.qty).toLocaleString('vi')}đ</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <button class="qbtn" onclick="changeQty('${key}',-1)"><i class="fa fa-minus"></i></button>
+                            <span class="qnum">${item.qty}</span>
+                            <button class="qbtn" onclick="changeQty('${key}',1)"><i class="fa fa-plus"></i></button>
+                        </div>
+                        <button class="del-btn" onclick="removeItem('${key}')"><i class="fa fa-xmark"></i></button>
+                    </div>
+                `).join('');
+            }
+            updateTotal();
+            updBadge();
+        }
+
+        // ========== VOUCHER ==========
+        function apCoup() {
+            const code = document.getElementById('coup').value.trim();
+            if (!code) { toast('❌ Nhập mã khuyến mãi'); return; }
+
+            fetch(`/Order/CheckVoucher?code=${encodeURIComponent(code)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) {
+                        voucherCode = code;
+                        discountType = data.discountType;
+                        discountValue = data.discountValue;
+                        recalcDiscount();
+                        toast('🎉 ' + data.message);
+                    } else {
+                        discount = 0; voucherCode = '';
+                        document.getElementById('drow').style.display = 'none';
+                        updateTotal();
+                        toast('❌ ' + data.message);
+                    }
+                });
+        }
+
+        function recalcDiscount() {
+            if (!voucherCode) return;
+            const subtotal = Object.values(cart).reduce((a, i) => a + i.price * i.qty, 0);
+            if (discountType === 'percent') discount = Math.round(subtotal * discountValue / 100);
+            else discount = discountValue;
+
+            document.getElementById('drow').style.display = 'flex';
+            document.getElementById('dlbl').textContent = discountType === 'percent' ? `Giảm ${discountValue}%` : 'Giảm giá';
+            document.getElementById('dval').textContent = '−' + discount.toLocaleString('vi') + 'đ';
+            updateTotal();
+        }
+
+        // ========== CLEAR ==========
+        function clrAll() {
+            cart = {}; discount = 0; voucherCode = ''; discountType = ''; discountValue = 0;
+            document.getElementById('coup').value = '';
+            document.getElementById('drow').style.display = 'none';
+            renderCart();
+            recalcAllBadges();
+        }
+
+        // ========== TOGGLE BILL ==========
+        function toggleBill() {
+            billVisible = !billVisible;
+            document.getElementById('sb').classList.toggle('hidden', !billVisible);
+        }
+
+        // ========== PAYMENT ==========
+        function openPayModal() {
+            const subtotal = Object.values(cart).reduce((a, i) => a + i.price * i.qty, 0);
+            if (!subtotal) { toast('<i class="fa fa-triangle-exclamation me-1"></i>Chưa có món'); return; }
+            const total = Math.max(0, subtotal - discount);
+            document.getElementById('ma').textContent = total.toLocaleString('vi') + 'đ';
+            bsPayModal.show();
+        }
+
+        function selPay(el) {
+            document.querySelectorAll('.pay-opt').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function confirmPayment() {
+            bsPayModal.hide();
+
+            const items = Object.values(cart).map(i => ({
+                drinkId: i.drinkId,
+                variantId: i.variantId || null,
+                quantity: i.qty
+            }));
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            fetch('/Order/CreateOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ items, voucherCode: voucherCode || null })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    orderCount++;
+                    document.getElementById('onum').textContent = '#' + String(orderCount).padStart(3, '0');
+                    document.getElementById('success-orderId').textContent = data.orderId;
+                    document.getElementById('success-total').textContent = data.total.toLocaleString('vi') + 'đ';
+                    bsSuccessModal.show();
+                } else {
+                    toast('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                }
+            })
+            .catch(() => {
+                // Fallback nếu chưa kết nối DB: vẫn hiện thành công UI
+                orderCount++;
+                document.getElementById('onum').textContent = '#' + String(orderCount).padStart(3, '0');
+                const total = Math.max(0, Object.values(cart).reduce((a, i) => a + i.price * i.qty, 0) - discount);
+                document.getElementById('success-orderId').textContent = 'ORD' + Date.now();
+                document.getElementById('success-total').textContent = total.toLocaleString('vi') + 'đ';
+                bsSuccessModal.show();
+            });
+        }
+
+        function closeSuccess() {
+            bsSuccessModal.hide();
+            clrAll();
+        }
+
+        // ========== TOAST ==========
+        let toastTimer;
+        function toast(msg) {
+            const pos = document.getElementById('toast-pos');
+            document.getElementById('toast-inner').innerHTML = msg;
+            pos.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => pos.classList.remove('show'), 2200);
+        }
+
+        // ========== CLOCK ==========
+        setInterval(() => {
+            document.getElementById('clock').textContent =
+                new Date().toLocaleTimeString('vi', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }, 1000);
+    </script>
+</body>
+</html> *@
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        /* ===== POS: chỉ phần sản phẩm ===== */
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-1px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        .pos-p-img {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            position: relative;
+        }
+
+        .pos-p-qbadge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: var(--green);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pos-p-body {
+            padding: 7px 9px 9px;
+        }
+
+        .pos-p-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 1px;
+        }
+
+        .pos-p-desc {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 23px;
+            height: 23px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+
+    <!-- SEARCH -->
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== DỮ LIỆU =====
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        // Emoji + màu nền theo categoryId
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+        const CAT_ICON = {
+            'Cà Phê':'fa-coffee','Trà Sữa':'fa-mug-hot','Sinh Tố':'fa-blender',
+            'Nước Ép':'fa-droplet','Trà Trái Cây':'fa-leaf','Matcha':'fa-seedling',
+            'Chocolate':'fa-candy-bar','Đá Xay':'fa-snowflake','Soda':'fa-flask',
+            'Latte':'fa-coffee','Cappuccino':'fa-coffee','Espresso':'fa-fire',
+            'Cold Brew':'fa-temperature-low','Yogurt':'fa-jar','Hoa Quả Dầm':'fa-bowl-food',
+            'Trà Hoa':'fa-spa','Kem':'fa-ice-cream','Nước Dừa':'fa-tree',
+            'Chanh Muối':'fa-lemon','Đặc Biệt':'fa-star'
+        };
+
+        let posCurCat = 'all';
+
+        // ===== BUILD CATEGORY BAR =====
+        (function() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const ic = CAT_ICON[c.name] || 'fa-mug-hot';
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa ${ic}"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        // ===== RENDER SẢN PHẨM =====
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#fef3c7';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                const col = document.createElement('div');
+                col.className = 'col-3 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg}">
+                            ${emoji}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#fef3c7';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            // Gọi hàm của Layout
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji);
+        }
+
+        // Lấy tổng qty của 1 drink trong giỏ (kể cả nhiều variant)
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        // Callback từ layout khi giỏ thay đổi — cập nhật badge sản phẩm
+        function pcOnCartChange(changedId) {
+            // Cập nhật tất cả badge cho nhanh
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        /* ===== POS: chỉ phần sản phẩm ===== */
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-1px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        .pos-p-img {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .pos-p-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+        .pos-p-qbadge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: var(--green);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pos-p-body {
+            padding: 7px 9px 9px;
+        }
+
+        .pos-p-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 1px;
+        }
+
+        .pos-p-desc {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 23px;
+            height: 23px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+
+    <!-- SEARCH -->
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== DỮ LIỆU =====
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        // Emoji + màu nền theo categoryId
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+        const CAT_ICON = {
+            'Cà Phê':'fa-coffee','Trà Sữa':'fa-mug-hot','Sinh Tố':'fa-blender',
+            'Nước Ép':'fa-droplet','Trà Trái Cây':'fa-leaf','Matcha':'fa-seedling',
+            'Chocolate':'fa-candy-bar','Đá Xay':'fa-snowflake','Soda':'fa-flask',
+            'Latte':'fa-coffee','Cappuccino':'fa-coffee','Espresso':'fa-fire',
+            'Cold Brew':'fa-temperature-low','Yogurt':'fa-jar','Hoa Quả Dầm':'fa-bowl-food',
+            'Trà Hoa':'fa-spa','Kem':'fa-ice-cream','Nước Dừa':'fa-tree',
+            'Chanh Muối':'fa-lemon','Đặc Biệt':'fa-star'
+        };
+
+        let posCurCat = 'all';
+
+        // ===== BUILD CATEGORY BAR =====
+        (function() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const ic = CAT_ICON[c.name] || 'fa-mug-hot';
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa ${ic}"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        // ===== RENDER SẢN PHẨM =====
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#fef3c7';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                // Nếu có ảnh thì hiện ảnh, không thì hiện emoji
+                const imgContent = d.img
+                    ? `<img src="/images/drinks/${d.img}" alt="${d.name}"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                            style="width:100%;height:100%;object-fit:cover;display:block;" />
+                       <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:30px;">${emoji}</span>`
+                    : `<span>${emoji}</span>`;
+
+                const col = document.createElement('div');
+                col.className = 'col-3 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg}">
+                            ${imgContent}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#fef3c7';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            // Gọi hàm của Layout
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji);
+        }
+
+        // Lấy tổng qty của 1 drink trong giỏ (kể cả nhiều variant)
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        // Callback từ layout khi giỏ thay đổi — cập nhật badge sản phẩm
+        function pcOnCartChange(changedId) {
+            // Cập nhật tất cả badge cho nhanh
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        /* ===== POS: chỉ phần sản phẩm ===== */
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-2px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        .pos-p-img {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .pos-p-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+        .pos-p-qbadge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: var(--green);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(16,185,129,.4);
+        }
+
+        .pos-p-body {
+            padding: 10px 11px 11px;
+        }
+
+        .pos-p-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .pos-p-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+
+    <!-- SEARCH -->
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== DỮ LIỆU =====
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        // Emoji + màu nền theo categoryId
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+        const CAT_ICON = {
+            'Cà Phê':'fa-coffee','Trà Sữa':'fa-mug-hot','Sinh Tố':'fa-blender',
+            'Nước Ép':'fa-droplet','Trà Trái Cây':'fa-leaf','Matcha':'fa-seedling',
+            'Chocolate':'fa-candy-bar','Đá Xay':'fa-snowflake','Soda':'fa-flask',
+            'Latte':'fa-coffee','Cappuccino':'fa-coffee','Espresso':'fa-fire',
+            'Cold Brew':'fa-temperature-low','Yogurt':'fa-jar','Hoa Quả Dầm':'fa-bowl-food',
+            'Trà Hoa':'fa-spa','Kem':'fa-ice-cream','Nước Dừa':'fa-tree',
+            'Chanh Muối':'fa-lemon','Đặc Biệt':'fa-star'
+        };
+
+        let posCurCat = 'all';
+
+        // ===== BUILD CATEGORY BAR =====
+        (function() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const ic = CAT_ICON[c.name] || 'fa-mug-hot';
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa ${ic}"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        // ===== RENDER SẢN PHẨM =====
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#fef3c7';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                // Nếu có ảnh thì hiện ảnh, không thì hiện emoji
+                const imgContent = d.img
+                    ? `<img src="/images/drinks/${d.img}" alt="${d.name}"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                            style="width:100%;height:100%;object-fit:cover;display:block;" />
+                       <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:30px;">${emoji}</span>`
+                    : `<span>${emoji}</span>`;
+
+                const col = document.createElement('div');
+                col.className = 'col-2 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg}">
+                            ${imgContent}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#fef3c7';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            // Gọi hàm của Layout
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji);
+        }
+
+        // Lấy tổng qty của 1 drink trong giỏ (kể cả nhiều variant)
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        // Callback từ layout khi giỏ thay đổi — cập nhật badge sản phẩm
+        function pcOnCartChange(changedId) {
+            // Cập nhật tất cả badge cho nhanh
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-2px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        /* ✅ FIX ẢNH: khung cố định, ảnh fill đầy, không bị méo */
+        .pos-p-img {
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .pos-p-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover; /* ảnh fill đầy khung, crop phần thừa */
+                object-position: center;
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .pos-p-img .emoji-fallback {
+                font-size: 42px;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+
+        .pos-p-qbadge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: var(--green);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(16,185,129,.4);
+            z-index: 2;
+        }
+
+        .pos-p-body {
+            padding: 10px 11px 11px;
+        }
+
+        .pos-p-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .pos-p-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+    <!-- SEARCH -->
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        // ✅ Emoji theo categoryId (map với CSDL)
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+
+        // ✅ Màu nền theo categoryId
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+
+        // ✅ Icon Font Awesome theo TÊN CATEGORY lấy từ CSDL
+        // Map đúng với Name trong bảng Categories
+        const CAT_ICON_MAP = {
+            'Cà Phê'       : 'fa-mug-hot',
+            'Trà Sữa'      : 'fa-glass-water-droplet',
+            'Sinh Tố'      : 'fa-blender',
+            'Nước Ép'      : 'fa-droplet',
+            'Trà Trái Cây' : 'fa-leaf',
+            'Matcha'       : 'fa-seedling',
+            'Chocolate'    : 'fa-mug-hot',
+            'Đá Xay'       : 'fa-snowflake',
+            'Soda'         : 'fa-flask',
+            'Latte'        : 'fa-mug-hot',
+            'Cappuccino'   : 'fa-mug-hot',
+            'Espresso'     : 'fa-fire-flame-curved',
+            'Cold Brew'    : 'fa-temperature-low',
+            'Yogurt'       : 'fa-jar',
+            'Hoa Quả Dầm'  : 'fa-bowl-food',
+            'Trà Hoa'      : 'fa-spa',
+            'Kem'          : 'fa-ice-cream',
+            'Nước Dừa'     : 'fa-tree',
+            'Chanh Muối'   : 'fa-lemon',
+            'Đặc Biệt'     : 'fa-star',
+        };
+
+        let posCurCat = 'all';
+
+        // ✅ Build category bar từ CSDL — icon lấy theo tên category
+        (function() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const icon = CAT_ICON_MAP[c.name] || 'fa-mug-hot'; // fallback nếu không có
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa ${icon}"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#fef3c7';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                // ✅ FIX ẢNH: dùng object-fit:cover + absolute để fill đầy khung
+                const imgContent = d.img
+                    ? `<img src="/images/drinks/${d.img}" alt="${d.name}"
+                            onerror="this.style.display='none';this.parentElement.querySelector('.emoji-fallback').style.display='flex';" />
+                       <span class="emoji-fallback" style="display:none;">${emoji}</span>`
+                    : `<span class="emoji-fallback">${emoji}</span>`;
+
+                const col = document.createElement('div');
+                col.className = 'col-2 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg}">
+                            ${imgContent}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#fef3c7';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji);
+        }
+
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        function pcOnCartChange(changedId) {
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-2px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        .pos-p-img {
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .pos-p-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .pos-p-img .emoji-fallback {
+                font-size: 42px;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+
+        .pos-p-qbadge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: var(--green);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(16,185,129,.4);
+            z-index: 2;
+        }
+
+        .pos-p-body {
+            padding: 10px 11px 11px;
+        }
+
+        .pos-p-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .pos-p-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+
+        const CAT_ICON_MAP = {
+            'Cà Phê'       : 'fa-mug-hot',
+            'Trà Sữa'      : 'fa-glass-water-droplet',
+            'Sinh Tố'      : 'fa-blender',
+            'Nước Ép'      : 'fa-droplet',
+            'Trà Trái Cây' : 'fa-leaf',
+            'Matcha'       : 'fa-seedling',
+            'Chocolate'    : 'fa-mug-hot',
+            'Đá Xay'       : 'fa-snowflake',
+            'Soda'         : 'fa-flask',
+            'Latte'        : 'fa-mug-hot',
+            'Cappuccino'   : 'fa-mug-hot',
+            'Espresso'     : 'fa-fire-flame-curved',
+            'Cold Brew'    : 'fa-temperature-low',
+            'Yogurt'       : 'fa-jar',
+            'Hoa Quả Dầm'  : 'fa-bowl-food',
+            'Trà Hoa'      : 'fa-spa',
+            'Kem'          : 'fa-ice-cream',
+            'Nước Dừa'     : 'fa-tree',
+            'Chanh Muối'   : 'fa-lemon',
+            'Đặc Biệt'     : 'fa-star',
+        };
+
+        let posCurCat = 'all';
+
+        (function() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const icon = CAT_ICON_MAP[c.name] || 'fa-mug-hot';
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa ${icon}"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#fef3c7';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                const imgContent = d.img
+                    ? `<img src="/images/drinks/${d.img}" alt="${d.name}"
+                            onerror="this.style.display='none';this.parentElement.querySelector('.emoji-fallback').style.display='flex';" />
+                       <span class="emoji-fallback" style="display:none;">${emoji}</span>`
+                    : `<span class="emoji-fallback">${emoji}</span>`;
+
+                const col = document.createElement('div');
+                col.className = 'col-2 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg}">
+                            ${imgContent}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        // ✅ FIX CHÍNH: truyền thêm d.img vào pcCardClick để sidebar hiển thị ảnh
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#fef3c7';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji, d.img); // ← thêm d.img
+        }
+
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        function pcOnCartChange(changedId) {
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+
+@* @model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+   
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito', sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito', sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        .pos-p-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-2px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        /* ✅ ẢNH: khung cứng 120px, ảnh cover đầy */
+        .pos-p-img {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            display: block; /* block để tránh inline gap */
+        }
+
+            /* ảnh thật */
+            .pos-p-img > img {
+                position: absolute;
+                inset: 0; /* top:0 right:0 bottom:0 left:0 */
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+            }
+
+            /* fallback emoji khi không có ảnh hoặc ảnh lỗi */
+            .pos-p-img > .emoji-wrap {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 42px;
+            }
+
+        /* badge số lượng */
+        .pos-p-qbadge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            z-index: 3;
+            background: var(--green);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(16,185,129,.4);
+        }
+
+        .pos-p-body {
+            padding: 10px 11px 11px;
+        }
+
+        .pos-p-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .pos-p-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-p-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        .pos-p-add {
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+    </style>
+}
+
+<div class="pos-wrap">
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        // Màu nền & emoji theo categoryId (vẫn giữ để hiện fallback đẹp)
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+
+        let posCurCat = 'all';
+
+        // ✅ Build category bar HOÀN TOÀN từ CSDL
+        // Không hardcode tên, không hardcode icon — tất cả đều động
+        // Icon: dùng fa-mug-hot làm mặc định cho tất cả (thêm/sửa/xóa category DB không cần sửa code)
+        (function buildCatBar() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                // ✅ Dùng icon mặc định fa-mug-hot — không phụ thuộc tên category
+                b.innerHTML = `<i class="fa fa-mug-hot"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#f1f5f9';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                // ✅ ẢNH: img absolute fill khung, emoji là fallback khi không có ảnh / ảnh lỗi
+                let imgHtml = '';
+                if (d.img) {
+                    imgHtml = `
+                        <img src="/images/drinks/${d.img}" alt="${d.name}"
+                             onload="this.nextElementSibling.style.display='none';"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                        <span class="emoji-wrap" style="background:${bg};">${emoji}</span>`;
+                } else {
+                    imgHtml = `<span class="emoji-wrap" style="background:${bg};">${emoji}</span>`;
+                }
+
+                const col = document.createElement('div');
+                col.className = 'col-2 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg};">
+                            ${imgHtml}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="pos-p-price">${d.price.toLocaleString('vi')}đ</span>
+                                <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            const bg    = POS_BG[d.catId]    || '#f1f5f9';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji, d.img);
+        }
+
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        function pcOnCartChange(changedId) {
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        posRender();
+    </script>
+} *@
+@model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Đặt Món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+                     ?? Enumerable.Empty<Web_QuanLy_PolyCafe.Models.Category>();
+
+    var drinksJson = System.Text.Json.JsonSerializer.Serialize(Model.Select(d => new
+    {
+        id = d.Id,
+        name = d.Name,
+        desc = d.Description ?? "",
+        price = d.Price,
+        catId = d.CategoryId,
+        catName = d.Category?.Name ?? "",
+        img = string.IsNullOrEmpty(d.ImageUrl) ? "" : d.ImageUrl,
+        available = d.IsAvailable,
+        variants = (d.DrinkVariants ?? new List<Web_QuanLy_PolyCafe.Models.DrinkVariant>())
+                    .Where(v => v.IsActive)
+                    .Select(v => new { id = v.Id, name = v.VariantName, extra = v.ExtraPrice })
+    }));
+
+    var catsJson = System.Text.Json.JsonSerializer.Serialize(
+        categories.Select(c => new { id = c.Id, name = c.Name })
+    );
+}
+
+@section HeadStyles {
+    <style>
+        .pos-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* SEARCH */
+        .pos-search {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 9px 14px;
+        }
+
+        .pos-search-inner {
+            position: relative;
+        }
+
+            .pos-search-inner input {
+                width: 100%;
+                padding: 8px 12px 8px 36px;
+                border: 1.5px solid var(--border);
+                border-radius: 9px;
+                font-size: 13px;
+                font-family: 'Nunito',sans-serif;
+                color: #1e293b;
+                background: var(--bg);
+                outline: none;
+                transition: all .15s;
+            }
+
+                .pos-search-inner input:focus {
+                    border-color: var(--amber);
+                    background: #fff;
+                }
+
+            .pos-search-inner .fa {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+        /* CATS */
+        .pos-cats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            padding: 8px 14px;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+            .pos-cats::-webkit-scrollbar {
+                display: none;
+            }
+
+        .pos-cat-btn {
+            border: 1.5px solid var(--border);
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Nunito',sans-serif;
+            transition: all .13s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .pos-cat-btn.active {
+                background: #1e293b;
+                color: #fff;
+                border-color: #1e293b;
+            }
+
+            .pos-cat-btn:hover:not(.active) {
+                border-color: var(--amber);
+                color: var(--amber2);
+            }
+
+        /* GRID */
+        .pos-grid-wrap {
+            flex: 1;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+        }
+
+            .pos-grid-wrap::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .pos-grid-wrap::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+        /* CARD */
+        .pos-p-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .pos-p-card:hover {
+                border-color: var(--amber);
+                box-shadow: 0 4px 14px rgba(245,158,11,.15);
+                transform: translateY(-2px);
+            }
+
+            .pos-p-card:active {
+                transform: scale(.97);
+            }
+
+        /* ẢNH: object-fit cover đúng tỉ lệ */
+        .pos-p-img {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #f1f5f9;
+        }
+
+            .pos-p-img > img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+            }
+
+            .pos-p-img > .emoji-wrap {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 42px;
+            }
+
+        /* Badge số lượng */
+        .pos-p-qbadge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            z-index: 3;
+            background: var(--green);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(16,185,129,.4);
+        }
+
+        /* BODY */
+        .pos-p-body {
+            padding: 10px 11px 11px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pos-p-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .pos-p-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .pos-p-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--amber2);
+        }
+
+        /* NÚT + và nút info */
+        .pos-p-add {
+            width: 26px;
+            height: 26px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-add:hover {
+                background: var(--amber);
+            }
+
+        .pos-p-info {
+            width: 26px;
+            height: 26px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .12s;
+            flex-shrink: 0;
+        }
+
+            .pos-p-info:hover {
+                background: #e0f2fe;
+                color: #0284c7;
+                border-color: #7dd3fc;
+            }
+
+        /* ===== MODAL CHI TIẾT ===== */
+        .pos-detail-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1050;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .pos-detail-overlay.show {
+                display: flex;
+            }
+
+        .pos-detail-modal {
+            background: #fff;
+            border-radius: 20px;
+            width: 420px;
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            overflow: hidden;
+            animation: modalIn .2s ease;
+        }
+        @@keyframes modalIn {
+            from
+
+        {
+            opacity: 0;
+            transform: scale(.94) translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        }
+
+        .pos-dm-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            background: #f1f5f9;
+        }
+
+        .pos-dm-emoji {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+
+        .pos-dm-body {
+            padding: 20px 22px 24px;
+        }
+
+        .pos-dm-cat {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--amber2);
+            background: var(--cream);
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .pos-dm-name {
+            font-family: 'Playfair Display',serif;
+            font-size: 20px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .pos-dm-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .pos-dm-price {
+            font-family: 'Playfair Display',serif;
+            font-size: 26px;
+            color: var(--amber2);
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .pos-dm-variants {
+            margin-bottom: 16px;
+        }
+
+        .pos-dm-var-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #94a3b8;
+            margin-bottom: 7px;
+        }
+
+        .pos-dm-var-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .pos-dm-var-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 11px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            color: #64748b;
+            background: #fff;
+            cursor: pointer;
+            transition: all .12s;
+        }
+
+            .pos-dm-var-tag:hover, .pos-dm-var-tag.sel {
+                border-color: var(--amber);
+                background: var(--cream);
+                color: var(--amber2);
+            }
+
+        .pos-dm-footer {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pos-dm-close {
+            flex-shrink: 0;
+            padding: 10px 18px;
+            border-radius: 9px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Nunito',sans-serif;
+            cursor: pointer;
+            transition: background .12s;
+        }
+
+            .pos-dm-close:hover {
+                background: #e2e8f0;
+            }
+
+        .pos-dm-order {
+            flex: 1;
+            padding: 10px 18px;
+            border-radius: 9px;
+            background: var(--amber);
+            color: #fff;
+            border: none;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Nunito',sans-serif;
+            cursor: pointer;
+            transition: background .12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+            .pos-dm-order:hover {
+                background: var(--amber2);
+            }
+
+        /* Tag không khả dụng */
+        .pos-p-unavail {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            z-index: 3;
+            background: rgba(239,68,68,.9);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+    </style>
+}
+
+<div class="pos-wrap">
+    <div class="pos-search">
+        <div class="pos-search-inner">
+            <i class="fa fa-magnifying-glass"></i>
+            <input id="pos-search" placeholder="Tìm kiếm món..." oninput="posFilter()" />
+        </div>
+    </div>
+
+    <div class="pos-cats" id="pos-cats">
+        <button class="pos-cat-btn active" data-cat="all" onclick="posCat(this)">
+            <i class="fa fa-border-all"></i>Tất cả
+        </button>
+    </div>
+
+    <div class="pos-grid-wrap">
+        <div class="row g-2" id="pos-grid"></div>
+    </div>
+</div>
+
+<!-- ===== MODAL CHI TIẾT ĐỒ UỐNG ===== -->
+<div class="pos-detail-overlay" id="posDetailOverlay" onclick="posCloseDetail(event)">
+    <div class="pos-detail-modal" id="posDetailModal">
+        <div id="pos-dm-img-wrap"></div>
+        <div class="pos-dm-body">
+            <div id="pos-dm-cat" class="pos-dm-cat"></div>
+            <div id="pos-dm-name" class="pos-dm-name"></div>
+            <div id="pos-dm-desc" class="pos-dm-desc"></div>
+            <div id="pos-dm-price" class="pos-dm-price"></div>
+            <div id="pos-dm-variants" class="pos-dm-variants" style="display:none">
+                <div class="pos-dm-var-title"><i class="fa fa-sliders me-1"></i>Tuỳ chọn size / topping</div>
+                <div id="pos-dm-var-list" class="pos-dm-var-list"></div>
+            </div>
+            <div class="pos-dm-footer">
+                <button class="pos-dm-close" onclick="posCloseDetailBtn()"><i class="fa fa-arrow-left me-1"></i>Đóng</button>
+                <button class="pos-dm-order" id="pos-dm-order-btn"><i class="fa fa-plus"></i>Thêm vào đơn</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const POS_DRINKS = @Html.Raw(drinksJson);
+        const POS_CATS   = @Html.Raw(catsJson);
+
+        const POS_BG = {
+            'CAT01':'#fef3c7','CAT02':'#fce7f3','CAT03':'#d1fae5','CAT04':'#fff7ed',
+            'CAT05':'#ffe4e6','CAT06':'#d1fae5','CAT07':'#fdf2f8','CAT08':'#dbeafe',
+            'CAT09':'#ecfdf5','CAT10':'#fef9c3','CAT11':'#fde68a','CAT12':'#fef3c7',
+            'CAT13':'#dbeafe','CAT14':'#fce7f3','CAT15':'#ffe4e6','CAT16':'#fdf4ff',
+            'CAT17':'#f5f3ff','CAT18':'#f0fdf4','CAT19':'#fef9c3','CAT20':'#fffbeb'
+        };
+        const POS_EMOJI = {
+            'CAT01':'☕','CAT02':'🧋','CAT03':'🥤','CAT04':'🍊','CAT05':'🍑',
+            'CAT06':'🍵','CAT07':'🍫','CAT08':'🧊','CAT09':'🫧','CAT10':'☕',
+            'CAT11':'☕','CAT12':'☕','CAT13':'🧊','CAT14':'🥛','CAT15':'🍓',
+            'CAT16':'🌸','CAT17':'🍦','CAT18':'🥥','CAT19':'🍋','CAT20':'⭐'
+        };
+
+        let posCurCat = 'all';
+        let posDetailDrink = null;
+        let posDetailSelVarId = null, posDetailSelVarExtra = 0, posDetailSelVarName = '';
+
+        /* Build category bar */
+        (function buildCatBar() {
+            const bar = document.getElementById('pos-cats');
+            POS_CATS.forEach(c => {
+                const b = document.createElement('button');
+                b.className = 'pos-cat-btn';
+                b.dataset.cat = c.id;
+                b.innerHTML = `<i class="fa fa-mug-hot"></i>${c.name}`;
+                b.onclick = function() { posCat(this); };
+                bar.appendChild(b);
+            });
+        })();
+
+        function posCat(btn) {
+            document.querySelectorAll('.pos-cat-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            posCurCat = btn.dataset.cat;
+            posRender();
+        }
+
+        function posRender() {
+            const q = document.getElementById('pos-search').value.toLowerCase();
+            const list = POS_DRINKS.filter(d =>
+                (posCurCat === 'all' || d.catId === posCurCat) &&
+                (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q))
+            );
+            const g = document.getElementById('pos-grid');
+            g.innerHTML = '';
+
+            list.forEach(d => {
+                const bg    = POS_BG[d.catId]    || '#f1f5f9';
+                const emoji = POS_EMOJI[d.catId] || '☕';
+                const qty   = posGetQty(d.id);
+
+                let imgHtml = '';
+                if (d.img) {
+                    imgHtml = `
+                        <img src="/images/drinks/${d.img}" alt="${d.name}"
+                             onload="this.nextElementSibling.style.display='none';"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                        <span class="emoji-wrap" style="background:${bg};">${emoji}</span>`;
+                } else {
+                    imgHtml = `<span class="emoji-wrap" style="background:${bg};">${emoji}</span>`;
+                }
+
+                const col = document.createElement('div');
+                col.className = 'col-2 pos-col';
+                col.dataset.id = d.id;
+                col.innerHTML = `
+                    <div class="pos-p-card" onclick="posClick('${d.id}')">
+                        <div class="pos-p-img" style="background:${bg};">
+                            ${imgHtml}
+                            <span class="pos-p-qbadge" id="pos-qb-${d.id}" style="display:${qty?'flex':'none'}">${qty}</span>
+                            ${!d.available ? '<span class="pos-p-unavail">Hết hàng</span>' : ''}
+                        </div>
+                        <div class="pos-p-body">
+                            <div class="pos-p-name">${d.name}</div>
+                            <div class="pos-p-desc">${d.desc || '&nbsp;'}</div>
+                            <div class="d-flex justify-content-between align-items-center gap-1">
+                                <span class="pos-p-price">${Number(d.price).toLocaleString('vi')}đ</span>
+                                <div class="d-flex gap-1">
+                                    <button class="pos-p-info" onclick="event.stopPropagation();posOpenDetail('${d.id}')" title="Chi tiết">
+                                        <i class="fa fa-circle-info"></i>
+                                    </button>
+                                    <button class="pos-p-add" onclick="event.stopPropagation();posClick('${d.id}')" title="Thêm vào đơn">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                g.appendChild(col);
+            });
+        }
+
+        function posFilter() { posRender(); }
+
+        function posClick(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d || !d.available) return;
+            const bg    = POS_BG[d.catId]    || '#f1f5f9';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            pcCardClick(d.id, d.name, d.price, d.variants, bg, emoji, d.img);
+        }
+
+        function posGetQty(id) {
+            return Object.entries(pcCart)
+                .filter(([k]) => k.startsWith(id))
+                .reduce((a, [, v]) => a + v.qty, 0);
+        }
+
+        function pcOnCartChange(changedId) {
+            POS_DRINKS.forEach(d => {
+                const b = document.getElementById('pos-qb-' + d.id);
+                if (!b) return;
+                const qty = posGetQty(d.id);
+                if (qty > 0) { b.style.display = 'flex'; b.textContent = qty; }
+                else b.style.display = 'none';
+            });
+        }
+
+        /* ===== MODAL CHI TIẾT ===== */
+        function posOpenDetail(id) {
+            const d = POS_DRINKS.find(x => x.id === id);
+            if (!d) return;
+            posDetailDrink = d;
+            posDetailSelVarId = null; posDetailSelVarExtra = 0; posDetailSelVarName = '';
+
+            const bg    = POS_BG[d.catId]    || '#f1f5f9';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+
+            /* Ảnh hoặc emoji */
+            const imgWrap = document.getElementById('pos-dm-img-wrap');
+            if (d.img) {
+                imgWrap.innerHTML = `
+                    <img class="pos-dm-img" src="/images/drinks/${d.img}" alt="${d.name}"
+                         onerror="this.outerHTML='<div class=\\'pos-dm-emoji\\' style=\\'background:${bg}\\'>${emoji}</div>'" />`;
+            } else {
+                imgWrap.innerHTML = `<div class="pos-dm-emoji" style="background:${bg}">${emoji}</div>`;
+            }
+
+            document.getElementById('pos-dm-cat').textContent   = d.catName || '';
+            document.getElementById('pos-dm-name').textContent  = d.name;
+            document.getElementById('pos-dm-desc').textContent  = d.desc || 'Chưa có mô tả.';
+            document.getElementById('pos-dm-price').textContent = Number(d.price).toLocaleString('vi') + 'đ';
+
+            /* Variants */
+            const varWrap = document.getElementById('pos-dm-variants');
+            const varList = document.getElementById('pos-dm-var-list');
+            if (d.variants && d.variants.length > 0) {
+                varList.innerHTML = '';
+                /* Tag mặc định */
+                const defTag = document.createElement('span');
+                defTag.className = 'pos-dm-var-tag sel';
+                defTag.textContent = `Mặc định — ${Number(d.price).toLocaleString('vi')}đ`;
+                defTag.onclick = () => {
+                    varList.querySelectorAll('.pos-dm-var-tag').forEach(t => t.classList.remove('sel'));
+                    defTag.classList.add('sel');
+                    posDetailSelVarId = null; posDetailSelVarExtra = 0; posDetailSelVarName = '';
+                    document.getElementById('pos-dm-price').textContent = Number(d.price).toLocaleString('vi') + 'đ';
+                };
+                varList.appendChild(defTag);
+
+                d.variants.forEach(v => {
+                    const tag = document.createElement('span');
+                    tag.className = 'pos-dm-var-tag';
+                    tag.textContent = `${v.name} +${Number(v.extra).toLocaleString('vi')}đ`;
+                    tag.onclick = () => {
+                        varList.querySelectorAll('.pos-dm-var-tag').forEach(t => t.classList.remove('sel'));
+                        tag.classList.add('sel');
+                        posDetailSelVarId    = v.id;
+                        posDetailSelVarExtra = v.extra;
+                        posDetailSelVarName  = v.name;
+                        document.getElementById('pos-dm-price').textContent =
+                            Number(d.price + v.extra).toLocaleString('vi') + 'đ';
+                    };
+                    varList.appendChild(tag);
+                });
+                varWrap.style.display = 'block';
+            } else {
+                varWrap.style.display = 'none';
+            }
+
+            /* Nút thêm vào đơn */
+            const orderBtn = document.getElementById('pos-dm-order-btn');
+            if (!d.available) {
+                orderBtn.disabled = true;
+                orderBtn.style.opacity = '.5';
+                orderBtn.style.cursor  = 'not-allowed';
+            } else {
+                orderBtn.disabled = false;
+                orderBtn.style.opacity = '1';
+                orderBtn.style.cursor  = 'pointer';
+            }
+            orderBtn.onclick = () => posDetailAddToCart();
+
+            document.getElementById('posDetailOverlay').classList.add('show');
+        }
+
+        function posDetailAddToCart() {
+            if (!posDetailDrink || !posDetailDrink.available) return;
+            const d  = posDetailDrink;
+            const bg = POS_BG[d.catId] || '#f1f5f9';
+            const emoji = POS_EMOJI[d.catId] || '☕';
+            pcAddToCart(d.id, d.name, Number(d.price) + posDetailSelVarExtra,
+                        posDetailSelVarId, posDetailSelVarName, bg, emoji, d.img);
+            posCloseDetailBtn();
+        }
+
+        function posCloseDetailBtn() {
+            document.getElementById('posDetailOverlay').classList.remove('show');
+        }
+
+        function posCloseDetail(e) {
+            if (e.target === document.getElementById('posDetailOverlay')) posCloseDetailBtn();
+        }
+
+        posRender();
+    </script>
+}
+
+
+
+
