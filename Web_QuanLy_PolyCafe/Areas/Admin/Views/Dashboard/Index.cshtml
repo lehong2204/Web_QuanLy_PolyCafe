@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="adm-page-title"><i class="fa fa-gauge-high me-2" style="color:var(--purple)"></i>Dashboard</div>
+<div class="adm-breadcrumb">Admin / Tổng quan</div>
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#fef3c7"><i class="fa fa-receipt" style="color:var(--amber)"></i></div>
+            <div>
+                <div class="stat-label">Tổng đơn hàng</div>
+                <div class="stat-val">@ViewBag.TotalOrders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#dcfce7"><i class="fa fa-calendar-day" style="color:var(--green)"></i></div>
+            <div>
+                <div class="stat-label">Đơn hôm nay</div>
+                <div class="stat-val">@ViewBag.TodayOrders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#dbeafe"><i class="fa fa-coins" style="color:var(--blue)"></i></div>
+            <div>
+                <div class="stat-label">Doanh thu tháng</div>
+                <div class="stat-val" style="font-size:16px">@(((decimal)ViewBag.MonthRevenue).ToString("N0"))đ</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#ede9fe"><i class="fa fa-mug-hot" style="color:var(--purple)"></i></div>
+            <div>
+                <div class="stat-label">Đồ uống</div>
+                <div class="stat-val">@ViewBag.TotalDrinks</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 COLS: TOP DRINKS + RECENT REVENUE -->
+<div class="row g-3">
+    <div class="col-md-5">
+        <div class="adm-table-wrap">
+            <div class="adm-table-head">
+                <span class="adm-table-title"><i class="fa fa-fire me-2" style="color:var(--amber)"></i>Top 5 bán chạy</span>
+            </div>
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tên món</th>
+                        <th>Đã bán</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rank = 1; }
+                    @foreach (var item in (dynamic)ViewBag.TopDrinks)
+                    {
+                        <tr>
+                            <td>
+                                @if (rank == 1) { <span style="color:gold;font-size:16px">🥇</span> }
+                                else if (rank == 2) { <span style="color:silver;font-size:16px">🥈</span> }
+                                else if (rank == 3) { <span style="color:#cd7f32;font-size:16px">🥉</span> }
+                                else { <span style="color:#94a3b8;font-weight:700">@rank</span> }
+                            </td>
+                            <td style="font-weight:700">@item.Name</td>
+                            <td><span class="badge-amber">@item.Total ly</span></td>
+                        </tr>
+                        rank++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="adm-table-wrap">
+            <div class="adm-table-head">
+                <span class="adm-table-title"><i class="fa fa-chart-line me-2" style="color:var(--blue)"></i>Doanh thu 7 ngày</span>
+                <span style="font-size:12px;color:#94a3b8">Tổng: <b style="color:var(--amber2)">@(((decimal)ViewBag.TotalRevenue).ToString("N0"))đ</b></span>
+            </div>
+            <table class="adm-table">
+                <thead>
+                    <tr><th>Ngày</th><th>Doanh thu</th><th>Biểu đồ</th></tr>
+                </thead>
+                <tbody>
+                    @{
+                        var revenueList = (dynamic)ViewBag.RevenueChart;
+                        decimal maxRev = 1;
+                        foreach (var r in revenueList) { if ((decimal)r.Revenue > maxRev) maxRev = (decimal)r.Revenue; }
+                    }
+                    @foreach (var r in revenueList)
+                    {
+                        var pct = (int)(((decimal)r.Revenue / maxRev) * 100);
+                        <tr>
+                            <td style="font-weight:700">@((DateTime)r.Date).ToString("dd/MM")</td>
+                            <td style="color:var(--amber2);font-weight:700">@(((decimal)r.Revenue).ToString("N0"))đ</td>
+                            <td style="width:120px">
+                                <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+                                    <div style="background:var(--amber);height:100%;width:@pct%;border-radius:4px;transition:width .3s"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

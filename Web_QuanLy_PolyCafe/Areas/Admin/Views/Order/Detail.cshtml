@@ -1,0 +1,51 @@
+@model Web_QuanLy_PolyCafe.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết đơn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center gap-3 mb-1">
+    <a href="/Admin/Order" class="btn-adm btn-adm-ghost" style="padding:6px 12px;font-size:12px"><i class="fa fa-arrow-left"></i></a>
+    <div>
+        <div class="adm-page-title"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Chi tiết đơn @Model.Id</div>
+        <div class="adm-breadcrumb">Admin / Đơn hàng / Chi tiết</div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-8">
+        <div class="adm-table-wrap">
+            <div class="adm-table-head"><span class="adm-table-title">Danh sách món</span></div>
+            <table class="adm-table">
+                <thead><tr><th>Món</th><th>Variant</th><th>Đơn giá</th><th>SL</th><th>Thành tiền</th></tr></thead>
+                <tbody>
+                    @foreach (var od in Model.OrderDetails ?? new List<Web_QuanLy_PolyCafe.Models.OrderDetail>())
+                    {
+                        <tr>
+                            <td style="font-weight:700">@od.Drink?.Name</td>
+                            <td style="font-size:12px;color:#64748b">@(od.Variant?.VariantName ?? "—")</td>
+                            <td>@od.UnitPrice.ToString("N0")đ</td>
+                            <td><span class="badge-blue">x@od.Quantity</span></td>
+                            <td style="font-weight:800;color:var(--amber2)">@((od.UnitPrice*od.Quantity).ToString("N0"))đ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="adm-card">
+            <div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--sb)">Thông tin đơn hàng</div>
+            <div class="d-flex justify-content-between mb-2"><span style="color:#64748b;font-size:12px">Nhân viên</span><b style="font-size:12px">@Model.User?.FullName</b></div>
+            <div class="d-flex justify-content-between mb-2"><span style="color:#64748b;font-size:12px">Thời gian</span><span style="font-size:12px">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</span></div>
+            <div class="d-flex justify-content-between mb-2"><span style="color:#64748b;font-size:12px">Voucher</span><span style="font-size:12px">@(Model.Voucher?.Code ?? "—")</span></div>
+            <div class="d-flex justify-content-between mb-2"><span style="color:#64748b;font-size:12px">Giảm giá</span><span style="font-size:12px;color:var(--green);font-weight:700">-@Model.DiscountAmount.ToString("N0")đ</span></div>
+            <hr style="border-color:var(--border)">
+            <div class="d-flex justify-content-between align-items-center">
+                <span style="font-weight:800;color:var(--sb)">Tổng tiền</span>
+                <span style="font-family:'Playfair Display',serif;font-size:20px;color:var(--amber2)">@Model.TotalPrice.ToString("N0")đ</span>
+            </div>
+            <div class="mt-3"><span class="badge-green"><i class="fa fa-check me-1"></i>@Model.Status</span></div>
+        </div>
+    </div>
+</div>

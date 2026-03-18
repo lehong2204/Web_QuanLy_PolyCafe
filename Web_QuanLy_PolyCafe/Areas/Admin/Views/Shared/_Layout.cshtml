@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin PolyCafe</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --amber:#f59e0b; --amber2:#d97706; --green:#10b981; --red:#ef4444;
+            --blue:#3b82f6; --purple:#8b5cf6;
+            --sb:#1e293b; --sb2:#273548; --bg:#f1f5f9; --border:#e2e8f0;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);}
+
+        /* TOPBAR */
+        .adm-top{
+            height:54px;background:#fff;border-bottom:1px solid var(--border);
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0 20px;position:fixed;top:0;left:0;right:0;z-index:200;
+            box-shadow:0 1px 4px rgba(0,0,0,.06);
+        }
+        .adm-brand{font-family:'Playfair Display',serif;font-size:16px;color:var(--sb);}
+        .adm-tag{background:#ede9fe;color:var(--purple);font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;}
+        .adm-user{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--sb);}
+        .adm-dot{width:7px;height:7px;background:var(--green);border-radius:50%;}
+        .adm-back{
+            background:var(--sb);color:#fff;border:none;border-radius:8px;
+            padding:6px 14px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;
+            cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;
+            transition:background .15s;
+        }
+        .adm-back:hover{background:#334155;color:#fff;}
+
+        /* SIDEBAR */
+        .adm-shell{display:flex;height:calc(100vh - 54px);margin-top:54px;}
+        .adm-side{
+            width:220px;background:var(--sb);flex-shrink:0;
+            display:flex;flex-direction:column;overflow-y:auto;
+        }
+        .adm-side::-webkit-scrollbar{width:3px;}
+        .adm-side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+
+        .adm-nav-section{padding:16px 14px 6px;font-size:10px;font-weight:800;
+            color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;}
+        .adm-nav-item{
+            display:flex;align-items:center;gap:10px;
+            padding:9px 16px;font-size:13px;font-weight:600;
+            color:rgba(255,255,255,.65);text-decoration:none;
+            transition:all .13s;border-left:3px solid transparent;
+        }
+        .adm-nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+        .adm-nav-item.active{
+            background:rgba(245,158,11,.12);color:var(--amber);
+            border-left-color:var(--amber);
+        }
+        .adm-nav-item i{width:16px;text-align:center;}
+
+        /* MAIN */
+        .adm-main{flex:1;overflow-y:auto;padding:20px;}
+        .adm-main::-webkit-scrollbar{width:5px;}
+        .adm-main::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+
+        /* PAGE TITLE */
+        .adm-page-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--sb);margin-bottom:4px;}
+        .adm-breadcrumb{font-size:12px;color:#94a3b8;margin-bottom:20px;}
+
+        /* STAT CARDS */
+        .stat-card{
+            background:#fff;border-radius:14px;padding:18px 20px;
+            box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid var(--border);
+        }
+        .stat-icon{
+            width:44px;height:44px;border-radius:12px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:18px;flex-shrink:0;
+        }
+        .stat-label{font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:3px;}
+        .stat-val{font-family:'Playfair Display',serif;font-size:22px;color:var(--sb);font-weight:700;}
+
+        /* TABLE */
+        .adm-table-wrap{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;border:1px solid var(--border);}
+        .adm-table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .adm-table-title{font-size:14px;font-weight:800;color:var(--sb);}
+        .adm-table{width:100%;border-collapse:collapse;}
+        .adm-table th{background:#f8fafc;padding:10px 14px;font-size:11px;font-weight:800;color:#64748b;text-align:left;border-bottom:1px solid var(--border);}
+        .adm-table td{padding:11px 14px;font-size:13px;color:var(--sb);border-bottom:1px solid #f8fafc;vertical-align:middle;}
+        .adm-table tr:hover td{background:#fafafa;}
+        .adm-table tr:last-child td{border-bottom:none;}
+
+        /* BADGES */
+        .badge-green{background:#dcfce7;color:#16a34a;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;}
+        .badge-red{background:#fee2e2;color:#dc2626;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;}
+        .badge-amber{background:#fef3c7;color:var(--amber2);font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;}
+        .badge-blue{background:#dbeafe;color:#2563eb;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;}
+        .badge-purple{background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;}
+
+        /* BUTTONS */
+        .btn-adm{border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .13s;}
+        .btn-adm-primary{background:var(--sb);color:#fff;}
+        .btn-adm-primary:hover{background:#334155;}
+        .btn-adm-amber{background:var(--amber);color:#fff;}
+        .btn-adm-amber:hover{background:var(--amber2);}
+        .btn-adm-green{background:var(--green);color:#fff;}
+        .btn-adm-green:hover{background:#059669;}
+        .btn-adm-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+        .btn-adm-red:hover{background:rgba(239,68,68,.2);}
+        .btn-adm-ghost{background:#f1f5f9;color:#64748b;}
+        .btn-adm-ghost:hover{background:#e2e8f0;}
+
+        /* FORM */
+        .adm-card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid var(--border);}
+        .adm-label{font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px;display:block;}
+        .adm-input{
+            width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;
+            font-size:13px;font-family:'Nunito',sans-serif;color:var(--sb);outline:none;background:#fff;
+        }
+        .adm-input:focus{border-color:var(--amber);}
+
+        /* TOAST */
+        .adm-toast{
+            position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(8px);
+            background:var(--sb);color:#fff;padding:9px 18px;border-radius:30px;
+            font-size:12px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.2);
+            opacity:0;transition:all .25s;z-index:9999;pointer-events:none;white-space:nowrap;
+        }
+        .adm-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* MODAL */
+        .modal-content{border-radius:16px;border:none;box-shadow:0 16px 50px rgba(0,0,0,.16);}
+
+        /* ALERT */
+        .adm-alert{padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;}
+        .adm-alert-success{background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;}
+        .adm-alert-error{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;}
+
+        /* PRODUCT IMAGE in table */
+        .drink-thumb{width:40px;height:40px;border-radius:9px;object-fit:cover;background:#f1f5f9;}
+        .drink-thumb-emoji{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+
+        /* SEARCH BAR */
+        .adm-search{position:relative;}
+        .adm-search input{padding-left:34px;}
+        .adm-search .fa{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;}
+    </style>
+    @await RenderSectionAsync("HeadStyles", required: false)
+</head>
+<body>
+@{
+    var adminName = Context.Session.GetString("FullName") ?? "Admin";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<!-- TOPBAR -->
+<div class="adm-top">
+    <div class="d-flex align-items-center gap-2">
+        <div style="width:32px;height:32px;background:var(--purple);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;">
+            ☕
+        </div>
+        <span class="adm-brand">PolyCafe</span>
+        <span class="adm-tag"><i class="fa fa-gauge-high me-1"></i>Admin</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="adm-user">
+            <div class="adm-dot"></div>
+            <i class="fa fa-user-shield" style="color:var(--purple);font-size:11px"></i>
+            @adminName
+        </div>
+        <a href="/Order/POS" class="adm-back">
+            <i class="fa fa-arrow-left"></i> Về POS
+        </a>
+    </div>
+</div>
+
+<!-- SHELL -->
+<div class="adm-shell">
+    <!-- SIDEBAR -->
+    <nav class="adm-side">
+        <div class="adm-nav-section">Tổng quan</div>
+        <a class="adm-nav-item @(currentController=="Dashboard"?"active":"")" href="/Admin/Dashboard">
+            <i class="fa fa-gauge-high"></i>Dashboard
+        </a>
+
+        <div class="adm-nav-section">Quản lý</div>
+        <a class="adm-nav-item @(currentController=="Drink"?"active":"")" href="/Admin/Drink">
+            <i class="fa fa-mug-hot"></i>Đồ uống
+        </a>
+        <a class="adm-nav-item @(currentController=="Category"?"active":"")" href="/Admin/Category">
+            <i class="fa fa-tags"></i>Danh mục
+        </a>
+        <a class="adm-nav-item @(currentController=="Order"?"active":"")" href="/Admin/Order">
+            <i class="fa fa-receipt"></i>Đơn hàng
+        </a>
+        <a class="adm-nav-item @(currentController=="User"?"active":"")" href="/Admin/User">
+            <i class="fa fa-users"></i>Người dùng
+        </a>
+
+        <div class="adm-nav-section">Tài khoản</div>
+        <a class="adm-nav-item" href="/Account/Profile">
+            <i class="fa fa-id-card"></i>Hồ sơ
+        </a>
+        <a class="adm-nav-item" href="/Account/Logout" style="color:rgba(239,68,68,.7)">
+            <i class="fa fa-right-from-bracket"></i>Đăng xuất
+        </a>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="adm-main">
+        @if (TempData["Success"] != null)
+        {
+            <div class="adm-alert adm-alert-success">
+                <i class="fa fa-check-circle me-2"></i>@TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="adm-alert adm-alert-error">
+                <i class="fa fa-triangle-exclamation me-2"></i>@TempData["Error"]
+            </div>
+        }
+        @RenderBody()
+    </main>
+</div>
+
+<div class="adm-toast" id="adm-toast"></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let _admToastTmr;
+    function admToast(msg, ok=true) {
+        const el = document.getElementById('adm-toast');
+        el.innerHTML = (ok ? '<i class="fa fa-check me-2"></i>' : '<i class="fa fa-xmark me-2"></i>') + msg;
+        el.classList.add('show');
+        clearTimeout(_admToastTmr);
+        _admToastTmr = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,37 +1,4 @@
-﻿//using Microsoft.EntityFrameworkCore;
-//using Web_QuanLy_PolyCafe.Data;
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//// Add services to the container.
-//builder.Services.AddControllersWithViews();
-//// ??ng ký DbContext - k?t n?i SQL Server localhost
-//builder.Services.AddDbContext<PolyCafeDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("PolyCafeDb")));
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    app.UseHsts();
-//}
-
-//app.UseHttpsRedirection();
-//app.UseRouting();
-
-//app.UseAuthorization();
-
-//app.MapStaticAssets();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Order}/{action=POS}/{id?}")
-//    .WithStaticAssets();
-
-
+﻿
 //app.Run();
 using Microsoft.EntityFrameworkCore;
 using Web_QuanLy_PolyCafe.Data;
@@ -72,7 +39,12 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// ✅ Đổi default route về Login thay vì POS
+// ✅ THÊM route Area vào TRƯỚC default
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+// Route mặc định
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}")

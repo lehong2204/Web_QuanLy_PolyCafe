@@ -1,0 +1,264 @@
+@model IEnumerable<Web_QuanLy_PolyCafe.Models.Category>
+@{
+    ViewData["Title"] = "Danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadStyles {
+<style>
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+
+    .cat-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1.5px solid var(--border);
+        padding: 16px 18px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        transition: all .15s;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .cat-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.09); transform: translateY(-1px); }
+
+    .cat-icon {
+        width: 46px; height: 46px;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0;
+    }
+    .cat-info { flex: 1; min-width: 0; }
+    .cat-name { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+    .cat-desc { font-size: 11px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-count { font-size: 11px; color: #d97706; font-weight: 700; margin-top: 3px; }
+
+    .cat-actions { display: flex; gap: 5px; flex-shrink: 0; }
+    .cat-btn {
+        width: 32px; height: 32px;
+        border: none; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 13px; transition: all .12s;
+    }
+    .cat-btn-edit { background: #f1f5f9; color: #475569; }
+    .cat-btn-edit:hover { background: #e2e8f0; color: #1e293b; }
+    .cat-btn-del  { background: #fff1f2; color: #e11d48; }
+    .cat-btn-del:hover  { background: #ffe4e6; }
+
+    /* MODAL */
+    .adm-modal-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+</style>
+}
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <div class="adm-page-title"><i class="fa fa-tags me-2" style="color:var(--amber)"></i>Danh mục</div>
+        <div class="adm-breadcrumb">Admin / Danh mục — <b>@Model.Count() danh mục</b></div>
+    </div>
+    <button class="btn-adm btn-adm-amber" onclick="openCreate()">
+        <i class="fa fa-plus"></i>Thêm danh mục
+    </button>
+</div>
+
+<!-- CARD GRID -->
+<div class="cat-grid" id="cat-grid">
+    @foreach (var c in Model)
+    {
+        <div class="cat-card" id="cat-card-@c.Id">
+            <div class="cat-icon">🏷️</div>
+            <div class="cat-info">
+                <div class="cat-name">@c.Name</div>
+                <div class="cat-desc">@(string.IsNullOrEmpty(c.Description) ? "Chưa có mô tả" : c.Description)</div>
+                <div class="cat-count"><i class="fa fa-mug-hot me-1"></i>@(c.Drinks?.Count ?? 0) đồ uống</div>
+            </div>
+            <div class="cat-actions">
+                <button class="cat-btn cat-btn-edit" title="Sửa"
+                        onclick="openEdit('@c.Id','@Html.Raw(c.Name.Replace("'","\\'"  ))','@Html.Raw((c.Description??"").Replace("'","\\'"))')">
+                    <i class="fa fa-pen"></i>
+                </button>
+                <button class="cat-btn cat-btn-del" title="Xoá"
+                        onclick="delCat('@c.Id','@Html.Raw(c.Name.Replace("'","\\'"  ))')">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5" style="color:#94a3b8">
+        <i class="fa fa-tags" style="font-size:40px;opacity:.2;margin-bottom:12px"></i>
+        <div style="font-size:14px">Chưa có danh mục nào</div>
+    </div>
+}
+
+<!-- ===== MODAL THÊM / SỬA ===== -->
+<div class="modal fade" id="catModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <div class="adm-modal-title" id="cat-modal-title">
+                <span id="cat-modal-icon">➕</span>
+                <span id="cat-modal-text">Thêm danh mục mới</span>
+            </div>
+
+            <input type="hidden" id="cat-id">
+
+            <label class="adm-label">Tên danh mục <span style="color:red">*</span></label>
+            <input id="cat-name" class="adm-input mb-3" placeholder="VD: Cà phê, Trà sữa, Nước ép...">
+
+            <label class="adm-label">Mô tả <span style="color:#94a3b8;font-weight:400">(không bắt buộc)</span></label>
+            <textarea id="cat-desc" class="adm-input mb-4" rows="3"
+                      placeholder="Mô tả ngắn về danh mục này..." style="resize:none"></textarea>
+
+            <div class="d-flex gap-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">
+                    <i class="fa fa-xmark me-1"></i>Huỷ
+                </button>
+                <button class="btn-adm btn-adm-amber flex-fill" id="cat-save-btn">
+                    <i class="fa fa-save me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL XÁC NHẬN XOÁ ===== -->
+<div class="modal fade" id="catDelModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content p-4 text-center">
+            <div style="font-size:36px;margin-bottom:10px">🗑️</div>
+            <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:6px">Xoá danh mục?</div>
+            <div id="catDel-name" style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:6px"></div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:18px">
+                Các đồ uống thuộc danh mục này sẽ không bị xoá.
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                <button class="btn-adm btn-adm-red flex-fill" id="catDel-confirm-btn">Xoá</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const catModal    = new bootstrap.Modal(document.getElementById('catModal'));
+const catDelModal = new bootstrap.Modal(document.getElementById('catDelModal'));
+let catMode = 'create';
+let pendingDelCatId = null;
+
+// ===== OPEN MODAL =====
+function openCreate() {
+    catMode = 'create';
+    document.getElementById('cat-modal-icon').textContent = '➕';
+    document.getElementById('cat-modal-text').textContent = 'Thêm danh mục mới';
+    document.getElementById('cat-save-btn').innerHTML = '<i class="fa fa-plus me-1"></i>Thêm';
+    document.getElementById('cat-id').value   = '';
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-desc').value = '';
+    catModal.show();
+    setTimeout(() => document.getElementById('cat-name').focus(), 300);
+}
+
+function openEdit(id, name, desc) {
+    catMode = 'edit';
+    document.getElementById('cat-modal-icon').textContent = '✏️';
+    document.getElementById('cat-modal-text').textContent = 'Sửa danh mục';
+    document.getElementById('cat-save-btn').innerHTML = '<i class="fa fa-save me-1"></i>Lưu thay đổi';
+    document.getElementById('cat-id').value   = id;
+    document.getElementById('cat-name').value = name;
+    document.getElementById('cat-desc').value = desc;
+    catModal.show();
+    setTimeout(() => document.getElementById('cat-name').focus(), 300);
+}
+
+// ===== SAVE =====
+document.getElementById('cat-save-btn').onclick = async () => {
+    const name = document.getElementById('cat-name').value.trim();
+    const desc = document.getElementById('cat-desc').value.trim();
+    const id   = document.getElementById('cat-id').value;
+
+    if (!name) { admToast('⚠️ Nhập tên danh mục!', false); document.getElementById('cat-name').focus(); return; }
+
+    const url  = catMode === 'create' ? '/Admin/Category/Create' : '/Admin/Category/Edit';
+    const body = { id, name, description: desc };
+
+    const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    const d = await r.json();
+
+    if (!d.success) { admToast(d.message || 'Lỗi!', false); return; }
+
+    catModal.hide();
+
+    if (catMode === 'create') {
+        // Thêm card mới vào grid không cần reload
+        const grid = document.getElementById('cat-grid');
+        const card = document.createElement('div');
+        card.className = 'cat-card';
+        card.id = 'cat-card-' + d.id;
+        card.innerHTML = `
+            <div class="cat-icon">🏷️</div>
+            <div class="cat-info">
+                <div class="cat-name">${name}</div>
+                <div class="cat-desc">${desc || 'Chưa có mô tả'}</div>
+                <div class="cat-count"><i class="fa fa-mug-hot me-1"></i>0 đồ uống</div>
+            </div>
+            <div class="cat-actions">
+                <button class="cat-btn cat-btn-edit" onclick="openEdit('${d.id}','${name.replace(/'/g,"\\'")}','${desc.replace(/'/g,"\\'")}')">
+                    <i class="fa fa-pen"></i>
+                </button>
+                <button class="cat-btn cat-btn-del" onclick="delCat('${d.id}','${name.replace(/'/g,"\\'")}')">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>`;
+        grid.prepend(card);
+        admToast('✅ Đã thêm danh mục!');
+    } else {
+        // Cập nhật card hiện có
+        const card = document.getElementById('cat-card-' + id);
+        if (card) {
+            card.querySelector('.cat-name').textContent = name;
+            card.querySelector('.cat-desc').textContent = desc || 'Chưa có mô tả';
+            // Cập nhật onclick của nút sửa
+            card.querySelector('.cat-btn-edit').setAttribute('onclick',
+                `openEdit('${id}','${name.replace(/'/g,"\\'")}','${desc.replace(/'/g,"\\'")}')` );
+        }
+        admToast('✅ Đã cập nhật!');
+    }
+};
+
+// Enter để lưu nhanh
+document.getElementById('cat-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('cat-save-btn').click();
+});
+
+// ===== DELETE =====
+function delCat(id, name) {
+    pendingDelCatId = id;
+    document.getElementById('catDel-name').textContent = name;
+    catDelModal.show();
+}
+
+document.getElementById('catDel-confirm-btn').onclick = async () => {
+    const r = await fetch('/Admin/Category/Delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${pendingDelCatId}`
+    });
+    const d = await r.json();
+    catDelModal.hide();
+    if (d.success) {
+        document.getElementById('cat-card-' + pendingDelCatId)?.remove();
+        admToast('🗑️ Đã xoá danh mục!');
+    } else {
+        admToast(d.message || 'Lỗi!', false);
+    }
+};
+</script>
+}

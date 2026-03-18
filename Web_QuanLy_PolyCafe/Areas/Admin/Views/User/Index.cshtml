@@ -1,0 +1,101 @@
+@model IEnumerable<Web_QuanLy_PolyCafe.Models.User>
+@{
+    ViewData["Title"] = "Người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="adm-page-title"><i class="fa fa-users me-2" style="color:var(--blue)"></i>Người dùng</div>
+<div class="adm-breadcrumb mb-3">Admin / Người dùng</div>
+
+<form method="get" class="d-flex gap-2 mb-3">
+    <div class="adm-search flex-fill">
+        <i class="fa fa-magnifying-glass"></i>
+        <input name="search" class="adm-input" placeholder="Tìm tên, email..." value="@ViewBag.Search">
+    </div>
+    <button type="submit" class="btn-adm btn-adm-primary"><i class="fa fa-filter"></i>Tìm</button>
+</form>
+
+<div class="adm-table-wrap">
+    <div class="adm-table-head">
+        <span class="adm-table-title">@Model.Count() tài khoản</span>
+    </div>
+    <table class="adm-table">
+        <thead>
+            <tr><th>Họ tên</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr id="user-row-@u.Id">
+                    <td style="font-weight:800">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:32px;height:32px;border-radius:50%;background:@(u.Role?"#ede9fe":"#dbeafe");display:flex;align-items:center;justify-content:center;font-size:13px">
+                                @(u.Role ? "👑" : "👤")
+                            </div>
+                            @u.FullName
+                        </div>
+                    </td>
+                    <td style="font-size:12px;color:#64748b">@u.Email</td>
+                    <td style="font-size:12px">@(u.Phone ?? "—")</td>
+                    <td>
+                        <span class="@(u.Role?"badge-purple":"badge-blue")" id="role-badge-@u.Id">
+                            @(u.Role ? "Admin" : "Staff")
+                        </span>
+                    </td>
+                    <td style="font-size:12px;color:#94a3b8">@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <span class="@(u.IsActive?"badge-green":"badge-red")" id="active-badge-@u.Id">
+                            @(u.IsActive ? "Hoạt động" : "Bị khoá")
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn-adm btn-adm-ghost" style="font-size:11px;padding:5px 10px"
+                                    onclick="toggleRole('@u.Id')" title="Đổi role">
+                                <i class="fa fa-shield-halved"></i>
+                            </button>
+                            <button class="btn-adm @(u.IsActive?"btn-adm-red":"btn-adm-green")" style="font-size:11px;padding:5px 10px"
+                                    onclick="toggleActive('@u.Id')" title="@(u.IsActive?"Khoá":"Mở khoá")"
+                                    id="active-btn-@u.Id">
+                                <i class="fa @(u.IsActive?"fa-lock":"fa-lock-open")"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+async function toggleActive(id) {
+    const r = await fetch('/Admin/User/ToggleActive',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`id=${id}`});
+    const d = await r.json();
+    if (!d.success) { admToast(d.message||'Lỗi!',false); return; }
+    const badge = document.getElementById('active-badge-'+id);
+    const btn   = document.getElementById('active-btn-'+id);
+    if (d.isActive) {
+        badge.className='badge-green'; badge.textContent='Hoạt động';
+        btn.className='btn-adm btn-adm-red'; btn.style.cssText='font-size:11px;padding:5px 10px';
+        btn.innerHTML='<i class="fa fa-lock"></i>';
+    } else {
+        badge.className='badge-red'; badge.textContent='Bị khoá';
+        btn.className='btn-adm btn-adm-green'; btn.style.cssText='font-size:11px;padding:5px 10px';
+        btn.innerHTML='<i class="fa fa-lock-open"></i>';
+    }
+    admToast(d.isActive?'Đã mở khoá':'Đã khoá tài khoản');
+}
+
+async function toggleRole(id) {
+    if (!confirm('Thay đổi vai trò tài khoản này?')) return;
+    const r = await fetch('/Admin/User/ToggleRole',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`id=${id}`});
+    const d = await r.json();
+    if (!d.success) { admToast(d.message||'Lỗi!',false); return; }
+    const badge = document.getElementById('role-badge-'+id);
+    badge.className = d.role==='Admin' ? 'badge-purple' : 'badge-blue';
+    badge.textContent = d.role;
+    admToast('Đã đổi role thành ' + d.role);
+}
+</script>
+}

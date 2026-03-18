@@ -724,15 +724,20 @@
                 <i class="fa fa-user-tie" style="color:#64748b;font-size:11px"></i>
                 @staffName
                 <div class="pc-staff-menu">
-                    <!-- Tên + role (readonly) -->
                     <a href="#" style="pointer-events:none;opacity:.6">
                         <i class="fa fa-user" style="color:var(--amber)"></i>@staffName
                     </a>
-                    @* <a href="#" style="pointer-events:none;opacity:.6">
-                        <i class="fa fa-shield-halved" style="color:#64748b"></i>@staffRole
-                    </a> *@
                     <hr style="margin:4px 0;border-color:#f1f5f9;" />
-                    <!-- ✅ THÔNG TIN CÁ NHÂN -->
+
+                    @* ✅ CHỈ HIỆN KHI LÀ ADMIN *@
+                    @if (staffRole ==    "Admin")
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                            <i class="fa fa-gauge-high" style="color:#8b5cf6"></i>Trang Admin
+                        </a>
+                        <hr style="margin:4px 0;border-color:#f1f5f9;" />
+                    }
+
                     <a asp-controller="Account" asp-action="Profile">
                         <i class="fa fa-id-card" style="color:#3b82f6"></i>Thông tin cá nhân
                     </a>

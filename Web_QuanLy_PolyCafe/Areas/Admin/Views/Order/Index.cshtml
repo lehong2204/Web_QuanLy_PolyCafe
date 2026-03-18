@@ -1,0 +1,58 @@
+@model IEnumerable<Web_QuanLy_PolyCafe.Models.Order>
+@{
+    ViewData["Title"] = "Đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="adm-page-title"><i class="fa fa-receipt me-2" style="color:var(--amber)"></i>Đơn hàng</div>
+<div class="adm-breadcrumb mb-3">Admin / Đơn hàng</div>
+
+<form method="get" class="d-flex gap-2 mb-3">
+    <div class="adm-search flex-fill">
+        <i class="fa fa-magnifying-glass"></i>
+        <input name="search" class="adm-input" placeholder="Tìm mã đơn, tên nhân viên..." value="@ViewBag.Search">
+    </div>
+    <input name="date" type="date" class="adm-input" style="width:160px" value="@ViewBag.Date">
+    <button type="submit" class="btn-adm btn-adm-primary"><i class="fa fa-filter"></i>Lọc</button>
+    <a href="/Admin/Order" class="btn-adm btn-adm-ghost"><i class="fa fa-rotate-left"></i></a>
+</form>
+
+<div class="adm-table-wrap">
+    <div class="adm-table-head">
+        <span class="adm-table-title">@Model.Count() đơn hàng</span>
+        <span style="font-size:12px;color:#94a3b8">Tổng doanh thu lọc: <b style="color:var(--amber2)">@Model.Sum(o=>o.TotalPrice).ToString("N0")đ</b></span>
+    </div>
+    <table class="adm-table">
+        <thead>
+            <tr><th>Mã đơn</th><th>Nhân viên</th><th>Số món</th><th>Giảm giá</th><th>Tổng tiền</th><th>Thời gian</th><th>Trạng thái</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td style="font-weight:800;font-size:12px">@o.Id</td>
+                    <td>@o.User?.FullName</td>
+                    <td><span class="badge-blue">@o.OrderDetails?.Sum(od=>od.Quantity) món</span></td>
+                    <td style="color:var(--green);font-weight:700">
+                        @if (o.DiscountAmount > 0)
+                        {
+                            <text>-@o.DiscountAmount.ToString("N0")đ</text>
+                        }
+                        else
+                        {
+                            <span style="color:#94a3b8">—</span>
+                        }
+                    </td>
+                    <td style="font-weight:800;color:var(--amber2)">@o.TotalPrice.ToString("N0")đ</td>
+                    <td style="font-size:12px;color:#64748b">@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td><span class="badge-green">@o.Status</span></td>
+                    <td>
+                        <a href="/Admin/Order/Detail/@o.Id" class="btn-adm btn-adm-ghost" style="font-size:11px;padding:5px 10px">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

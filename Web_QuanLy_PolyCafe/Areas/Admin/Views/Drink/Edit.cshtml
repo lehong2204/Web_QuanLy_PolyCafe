@@ -1,0 +1,168 @@
+@model Web_QuanLy_PolyCafe.Models.Drink
+@{
+    ViewData["Title"] = "Sửa đồ uống";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center gap-3 mb-1">
+    <a href="/Admin/Drink" class="btn-adm btn-adm-ghost" style="padding:6px 12px;font-size:12px">
+        <i class="fa fa-arrow-left"></i>
+    </a>
+    <div>
+        <div class="adm-page-title"><i class="fa fa-pen me-2" style="color:var(--blue)"></i>Sửa: @Model.Name</div>
+        <div class="adm-breadcrumb">Admin / Đồ uống / Sửa</div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-8">
+        <div class="adm-card">
+            <form method="post" enctype="multipart/form-data" action="/Admin/Drink/Edit">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="adm-label">Tên đồ uống <span style="color:red">*</span></label>
+                        <input name="Name" class="adm-input" value="@Model.Name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Danh mục <span style="color:red">*</span></label>
+                        <select name="CategoryId" class="adm-input" required>
+                            @foreach (var c in (IEnumerable<Web_QuanLy_PolyCafe.Models.Category>)ViewBag.Categories)
+                            {
+                                <option value="@c.Id" @(Model.CategoryId==c.Id?"selected":"")>@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Giá (đ) <span style="color:red">*</span></label>
+                        <input name="Price" type="number" class="adm-input" value="@Model.Price" min="0" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="adm-label">Mô tả</label>
+                        <textarea name="Description" class="adm-input" rows="3">@Model.Description</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Ảnh mới (để trống nếu không đổi)</label>
+                        <input name="imageFile" type="file" class="adm-input" accept="image/*" onchange="previewImg(this)">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Trạng thái</label>
+                        <select name="IsAvailable" class="adm-input">
+                            <option value="true" @(Model.IsAvailable?"selected":"")>✅ Đang bán</option>
+                            <option value="false" @(!Model.IsAvailable?"selected":"")>❌ Tạm ẩn</option>
+                        </select>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="col-12">
+                            <label class="adm-label">Ảnh hiện tại</label>
+                            <img src="/images/drinks/@Model.ImageUrl" id="img-preview"
+                                 style="height:100px;border-radius:10px;object-fit:cover">
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-12" id="img-preview-wrap" style="display:none">
+                            <img id="img-preview" style="height:100px;border-radius:10px;object-fit:cover">
+                        </div>
+                    }
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a href="/Admin/Drink" class="btn-adm btn-adm-ghost">Huỷ</a>
+                    <button type="submit" class="btn-adm btn-adm-amber flex-fill">
+                        <i class="fa fa-save"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VARIANTS -->
+    <div class="col-md-4">
+        <div class="adm-card">
+            <div style="font-size:13px;font-weight:800;color:var(--sb);margin-bottom:12px">
+                <i class="fa fa-sliders me-2" style="color:var(--purple)"></i>Size / Topping
+            </div>
+            <div id="var-list">
+                @if (Model.DrinkVariants?.Any() == true)
+                {
+                    @foreach (var v in Model.DrinkVariants.Where(x => x.IsActive))
+                    {
+                        <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background:#f8fafc;border:1px solid var(--border)" id="var-@v.Id">
+                            <div>
+                                <div style="font-size:12px;font-weight:700">@v.VariantName</div>
+                                <div style="font-size:11px;color:var(--amber2)">+@v.ExtraPrice.ToString("N0")đ</div>
+                            </div>
+                            <button class="btn-adm btn-adm-red" style="padding:4px 8px;font-size:11px" onclick="delVar('@v.Id')">
+                                <i class="fa fa-xmark"></i>
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div id="no-var" style="font-size:12px;color:#94a3b8;text-align:center;padding:10px 0">Chưa có variant</div>
+                }
+            </div>
+            <hr style="border-color:var(--border);margin:12px 0">
+            <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:8px">Thêm variant mới</div>
+            <input id="var-name" class="adm-input mb-2" placeholder="Tên (VD: Size L, Thêm trân châu)">
+            <input id="var-extra" class="adm-input mb-2" type="number" placeholder="Giá thêm (đ)" min="0" value="0">
+            <button class="btn-adm btn-adm-green w-100" onclick="addVar('@Model.Id')">
+                <i class="fa fa-plus"></i>Thêm
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function previewImg(input) {
+    const img = document.getElementById('img-preview');
+    const wrap = document.getElementById('img-preview-wrap');
+    if (input.files && input.files[0]) {
+        const r = new FileReader();
+        r.onload = e => {
+            if (img) { img.src = e.target.result; }
+            if (wrap) wrap.style.display='block';
+        };
+        r.readAsDataURL(input.files[0]);
+    }
+}
+
+async function addVar(drinkId) {
+    const name = document.getElementById('var-name').value.trim();
+    const extra = parseFloat(document.getElementById('var-extra').value) || 0;
+    if (!name) { admToast('Nhập tên variant!', false); return; }
+
+    const r = await fetch('/Admin/Drink/AddVariant', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ drinkId, variantName: name, extraPrice: extra })
+    });
+    const d = await r.json();
+    if (d.success) {
+        document.getElementById('var-name').value = '';
+        document.getElementById('var-extra').value = '0';
+        const noVar = document.getElementById('no-var');
+        if (noVar) noVar.remove();
+        const el = document.createElement('div');
+        el.className = 'd-flex justify-content-between align-items-center p-2 mb-1 rounded';
+        el.style = 'background:#f8fafc;border:1px solid var(--border)';
+        el.id = 'var-' + d.id;
+        el.innerHTML = `<div><div style="font-size:12px;font-weight:700">${name}</div><div style="font-size:11px;color:var(--amber2)">+${extra.toLocaleString('vi')}đ</div></div><button class="btn-adm btn-adm-red" style="padding:4px 8px;font-size:11px" onclick="delVar('${d.id}')"><i class="fa fa-xmark"></i></button>`;
+        document.getElementById('var-list').appendChild(el);
+        admToast('Đã thêm!');
+    } else admToast(d.message || 'Lỗi!', false);
+}
+
+async function delVar(id) {
+    const r = await fetch('/Admin/Drink/DeleteVariant', {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:`id=${id}`
+    });
+    const d = await r.json();
+    if (d.success) { document.getElementById('var-'+id)?.remove(); admToast('Đã xoá!'); }
+}
+</script>
+}

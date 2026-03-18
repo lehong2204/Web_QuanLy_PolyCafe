@@ -1,0 +1,493 @@
+@model IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>
+@{
+    ViewData["Title"] = "Quản lý đồ uống";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var active  = Model.Where(d => !d.IsDeleted).ToList();
+    var hidden  = Model.Where(d =>  d.IsDeleted).ToList();
+}
+
+@section HeadStyles {
+<style>
+    /* TABS */
+    .drink-tabs { display:flex; gap:8px; margin-bottom:20px; }
+    .drink-tab {
+        display:flex; align-items:center; gap:8px;
+        padding:9px 20px; border-radius:10px; border:none;
+        font-size:13px; font-weight:700; font-family:'Nunito',sans-serif;
+        cursor:pointer; transition:all .15s;
+    }
+    .drink-tab.active { background:#1e293b; color:#fff; }
+    .drink-tab:not(.active) { background:#f1f5f9; color:#64748b; }
+    .drink-tab:not(.active):hover { background:#e2e8f0; color:#1e293b; }
+    .tab-count {
+        min-width:22px; height:22px; border-radius:20px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:11px; font-weight:800; padding:0 6px;
+    }
+    .drink-tab.active     .tab-count { background:var(--amber); color:#fff; }
+    .drink-tab:not(.active) .tab-count { background:#e2e8f0; color:#64748b; }
+
+    /* PANEL */
+    .drink-panel { display:none; }
+    .drink-panel.show { display:block; }
+
+    /* TABLE WRAP */
+    .drink-table-wrap {
+        background:#fff; border-radius:14px;
+        border:1px solid var(--border);
+        box-shadow:0 1px 4px rgba(0,0,0,.06);
+        overflow:hidden;
+    }
+    .drink-table { width:100%; border-collapse:collapse; }
+    .drink-table th {
+        background:#f8fafc; padding:11px 16px;
+        font-size:11px; font-weight:800; color:#64748b;
+        text-align:left; border-bottom:1px solid var(--border);
+        text-transform:uppercase; letter-spacing:.5px;
+    }
+    .drink-table td {
+        padding:12px 16px; border-bottom:1px solid #f8fafc;
+        vertical-align:middle; font-size:13px; color:#1e293b;
+    }
+    .drink-table tr:last-child td { border-bottom:none; }
+    .drink-table tr:hover td { background:#fafafa; }
+
+    /* THUMB */
+    .dt-thumb {
+        width:46px; height:46px; border-radius:10px;
+        object-fit:cover; background:#f1f5f9; display:block;
+    }
+    .dt-thumb-emoji {
+        width:46px; height:46px; border-radius:10px;
+        background:#f1f5f9; display:flex; align-items:center;
+        justify-content:center; font-size:22px;
+    }
+
+    /* STATUS BUTTON */
+    .status-btn {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:6px 12px; border-radius:20px; border:none;
+        font-size:11px; font-weight:800; font-family:'Nunito',sans-serif;
+        cursor:pointer; transition:all .15s; white-space:nowrap;
+    }
+    .status-btn.selling  { background:#dcfce7; color:#16a34a; }
+    .status-btn.selling:hover  { background:#bbf7d0; }
+    .status-btn.paused   { background:#fef3c7; color:#d97706; }
+    .status-btn.paused:hover   { background:#fde68a; }
+
+    /* ACTION BTNS */
+    .dt-actions { display:flex; align-items:center; gap:6px; }
+    .dt-btn {
+        width:34px; height:34px; border:none; border-radius:9px;
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; font-size:14px; transition:all .12s;
+    }
+    .dt-btn-edit  { background:#f1f5f9; color:#475569; }
+    .dt-btn-edit:hover  { background:#e2e8f0; color:#1e293b; }
+    .dt-btn-hide  { background:#fff7ed; color:#d97706; border:1px solid #fed7aa; }
+    .dt-btn-hide:hover  { background:#ffedd5; }
+    .dt-btn-show  { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+    .dt-btn-show:hover  { background:#dcfce7; }
+    .dt-btn-del   { background:#fff1f2; color:#e11d48; border:1px solid #fecdd3; }
+    .dt-btn-del:hover   { background:#ffe4e6; }
+
+    /* FILTER BAR */
+    .filter-bar {
+        background:#fff; border:1px solid var(--border);
+        border-radius:12px; padding:12px 16px;
+        display:flex; gap:10px; align-items:center;
+        margin-bottom:14px;
+    }
+    .filter-bar .adm-search { flex:1; }
+
+    /* EMPTY */
+    .dt-empty { padding:48px 20px; text-align:center; color:#94a3b8; }
+    .dt-empty i { font-size:40px; opacity:.2; display:block; margin-bottom:10px; }
+</style>
+}
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div class="adm-page-title"><i class="fa fa-mug-hot me-2" style="color:var(--amber)"></i>Quản Lý Đồ Uống</div>
+        <div class="adm-breadcrumb">@active.Count(d => d.IsAvailable) món đang hoạt động</div>
+    </div>
+    <a href="/Admin/Drink/Create" class="btn-adm btn-adm-amber">
+        <i class="fa fa-plus"></i>Thêm Đồ Uống
+    </a>
+</div>
+
+<!-- TABS -->
+<div class="drink-tabs">
+    <button class="drink-tab active" id="tab-active" onclick="switchTab('active')">
+        <i class="fa fa-circle-check"></i>
+        Đang Hoạt Động
+        <span class="tab-count" id="count-active">@active.Count</span>
+    </button>
+    <button class="drink-tab" id="tab-hidden" onclick="switchTab('hidden')">
+        <i class="fa fa-eye-slash"></i>
+        Đã Ẩn
+        <span class="tab-count" id="count-hidden">@hidden.Count</span>
+    </button>
+</div>
+
+<!-- ===== PANEL: ĐANG HOẠT ĐỘNG ===== -->
+<div class="drink-panel show" id="panel-active">
+    <!-- Filter -->
+    <div class="filter-bar">
+        <div class="adm-search">
+            <i class="fa fa-magnifying-glass"></i>
+            <input class="adm-input" id="search-active" placeholder="Tìm tên đồ uống..." oninput="filterTable('active')">
+        </div>
+        <select class="adm-input" style="width:200px" id="cat-active" onchange="filterTable('active')">
+            <option value="">-- Tất cả danh mục --</option>
+            @foreach (var c in (IEnumerable<Web_QuanLy_PolyCafe.Models.Category>)ViewBag.Categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+        <button class="btn-adm btn-adm-ghost" style="padding:8px 12px" onclick="clearFilter('active')" title="Reset">
+            <i class="fa fa-rotate-left"></i>
+        </button>
+    </div>
+
+    <div class="drink-table-wrap">
+        <table class="drink-table" id="table-active">
+            <thead>
+                <tr>
+                    <th style="width:70px">Hình ảnh</th>
+                    <th>Tên món</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Trạng thái bán</th>
+                    <th style="width:120px;text-align:right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-active">
+                @foreach (var d in active)
+                {
+                    <tr id="row-@d.Id" data-cat="@d.CategoryId" data-name="@d.Name.ToLower()">
+                        <td>
+                            @if (!string.IsNullOrEmpty(d.ImageUrl))
+                            {
+                                <img src="/images/drinks/@d.ImageUrl" class="dt-thumb"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <div class="dt-thumb-emoji" style="display:none">☕</div>
+                            }
+                            else
+                            {
+                                <div class="dt-thumb-emoji">☕</div>
+                            }
+                        </td>
+                        <td>
+                            <div style="font-weight:800">@d.Name</div>
+                            @if (!string.IsNullOrEmpty(d.Description))
+                            {
+                                <div style="font-size:11px;color:#94a3b8;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">@d.Description</div>
+                            }
+                            @if (d.DrinkVariants?.Any(v => v.IsActive) == true)
+                            {
+                                <span style="font-size:10px;color:#8b5cf6;background:#ede9fe;padding:1px 7px;border-radius:14px;margin-top:2px;display:inline-block">
+                                    <i class="fa fa-sliders me-1"></i>@d.DrinkVariants.Count(v => v.IsActive) size
+                                </span>
+                            }
+                        </td>
+                        <td><span class="badge-blue">@d.Category?.Name</span></td>
+                        <td style="font-weight:800;color:var(--amber2)">@d.Price.ToString("N0")đ</td>
+                        <td>
+                            @if (d.IsAvailable)
+                            {
+                                <button class="status-btn selling" id="status-btn-@d.Id"
+                                        onclick="toggleAvail('@d.Id', this)"
+                                        title="Đang bán — click để tạm ngừng">
+                                    <i class="fa fa-circle-check"></i>Đang bán
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="status-btn paused" id="status-btn-@d.Id"
+                                        onclick="toggleAvail('@d.Id', this)"
+                                        title="Tạm ngừng — click để bán lại">
+                                    <i class="fa fa-pause-circle"></i>Tạm ngừng
+                                </button>
+                            }
+                        </td>
+                        <td>
+                            <div class="dt-actions" style="justify-content:flex-end">
+                                <a href="/Admin/Drink/Edit/@d.Id" class="dt-btn dt-btn-edit" title="Sửa thông tin">
+                                    <i class="fa fa-pen"></i>
+                                </a>
+                                <button class="dt-btn dt-btn-hide" title="Ẩn đồ uống này" onclick="hideDrink('@d.Id','@d.Name')">
+                                    <i class="fa fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!active.Any())
+        {
+            <div class="dt-empty"><i class="fa fa-mug-hot"></i>Chưa có đồ uống nào</div>
+        }
+    </div>
+</div>
+
+<!-- ===== PANEL: ĐÃ ẨN ===== -->
+<div class="drink-panel" id="panel-hidden">
+    <!-- Filter -->
+    <div class="filter-bar">
+        <div class="adm-search">
+            <i class="fa fa-magnifying-glass"></i>
+            <input class="adm-input" id="search-hidden" placeholder="Tìm tên đồ uống..." oninput="filterTable('hidden')">
+        </div>
+        <select class="adm-input" style="width:200px" id="cat-hidden" onchange="filterTable('hidden')">
+            <option value="">-- Tất cả danh mục --</option>
+            @foreach (var c in (IEnumerable<Web_QuanLy_PolyCafe.Models.Category>)ViewBag.Categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+        <button class="btn-adm btn-adm-ghost" style="padding:8px 12px" onclick="clearFilter('hidden')" title="Reset">
+            <i class="fa fa-rotate-left"></i>
+        </button>
+    </div>
+
+    <div class="drink-table-wrap">
+        <table class="drink-table" id="table-hidden">
+            <thead>
+                <tr>
+                    <th style="width:70px">Hình ảnh</th>
+                    <th>Tên món</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Lý do ẩn</th>
+                    <th style="width:140px;text-align:right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-hidden">
+                @foreach (var d in hidden)
+                {
+                    <tr id="row-h-@d.Id" data-cat="@d.CategoryId" data-name="@d.Name.ToLower()">
+                        <td>
+                            @if (!string.IsNullOrEmpty(d.ImageUrl))
+                            {
+                                <img src="/images/drinks/@d.ImageUrl" class="dt-thumb" style="opacity:.5"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <div class="dt-thumb-emoji" style="display:none;opacity:.5">☕</div>
+                            }
+                            else
+                            {
+                                <div class="dt-thumb-emoji" style="opacity:.5">☕</div>
+                            }
+                        </td>
+                        <td>
+                            <div style="font-weight:800;color:#94a3b8">@d.Name</div>
+                            @if (!string.IsNullOrEmpty(d.Description))
+                            {
+                                <div style="font-size:11px;color:#cbd5e1;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">@d.Description</div>
+                            }
+                        </td>
+                        <td><span class="badge-blue" style="opacity:.6">@d.Category?.Name</span></td>
+                        <td style="font-weight:800;color:#94a3b8">@d.Price.ToString("N0")đ</td>
+                        <td><span class="badge-red">Ngừng bán</span></td>
+                        <td>
+                            <div class="dt-actions" style="justify-content:flex-end">
+                                <a href="/Admin/Drink/Edit/@d.Id" class="dt-btn dt-btn-edit" title="Sửa">
+                                    <i class="fa fa-pen"></i>
+                                </a>
+                                <button class="dt-btn dt-btn-show" title="Hiển thị lại" onclick="showDrink('@d.Id','@d.Name')">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <button class="dt-btn dt-btn-del" title="Xoá vĩnh viễn" onclick="confirmDel('@d.Id','@d.Name')">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!hidden.Any())
+        {
+            <div class="dt-empty"><i class="fa fa-eye-slash"></i>Không có đồ uống nào đang ẩn</div>
+        }
+    </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal fade" id="delModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content p-4 text-center">
+            <div style="font-size:36px;margin-bottom:10px">🗑️</div>
+            <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:6px">Xoá vĩnh viễn?</div>
+            <div id="del-name" style="font-size:13px;color:#64748b;margin-bottom:6px"></div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:18px">Không thể hoàn tác!</div>
+            <div class="d-flex gap-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                <button class="btn-adm btn-adm-red flex-fill" id="del-confirm-btn">Xoá</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const delModal = new bootstrap.Modal(document.getElementById('delModal'));
+let pendingDelId = null;
+
+// ===== TAB SWITCH =====
+function switchTab(tab) {
+    document.querySelectorAll('.drink-panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.drink-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('show');
+    document.getElementById('tab-'   + tab).classList.add('active');
+}
+
+// ===== FILTER =====
+function filterTable(tab) {
+    const q   = (document.getElementById('search-' + tab)?.value || '').toLowerCase();
+    const cat = document.getElementById('cat-' + tab)?.value || '';
+    const rows = document.querySelectorAll('#tbody-' + (tab === 'active' ? 'active' : 'hidden') + ' tr');
+    rows.forEach(r => {
+        const nameMatch = r.dataset.name?.includes(q);
+        const catMatch  = !cat || r.dataset.cat === cat;
+        r.style.display = (nameMatch && catMatch) ? '' : 'none';
+    });
+}
+
+function clearFilter(tab) {
+    document.getElementById('search-' + tab).value = '';
+    document.getElementById('cat-'    + tab).value = '';
+    filterTable(tab);
+}
+
+// ===== TOGGLE (tạm ngừng / mở lại) không chuyển tab =====
+async function toggleAvail(id, btn) {
+    const isSelling = btn.classList.contains('selling');
+    const newAvail  = !isSelling; // click đang bán → tạm ngừng và ngược lại
+
+    const r = await fetch('/Admin/Drink/SetStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isAvailable: newAvail, isDeleted: false })
+    });
+    const d = await r.json();
+    if (!d.success) { admToast('Lỗi!', false); return; }
+
+    if (newAvail) {
+        btn.className = 'status-btn selling';
+        btn.title     = 'Đang bán — click để tạm ngừng';
+        btn.innerHTML = '<i class="fa fa-circle-check"></i>Đang bán';
+        admToast('✅ Đang bán lại!');
+    } else {
+        btn.className = 'status-btn paused';
+        btn.title     = 'Tạm ngừng — click để bán lại';
+        btn.innerHTML = '<i class="fa fa-pause-circle"></i>Tạm ngừng';
+        admToast('⏸ Đã tạm ngừng!');
+    }
+}
+
+// ===== ẨN DRINK (chuyển sang tab Đã ẩn) =====
+async function hideDrink(id, name) {
+    const r = await fetch('/Admin/Drink/SetStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isAvailable: false, isDeleted: true })
+    });
+    const d = await r.json();
+    if (!d.success) { admToast('Lỗi!', false); return; }
+
+    // Lấy row từ active
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+
+    // Clone sang tbody-hidden
+    const name_val  = row.querySelector('td:nth-child(2) div:first-child')?.textContent?.trim() || name;
+    const catText   = row.querySelector('.badge-blue')?.textContent?.trim() || '';
+    const catId     = row.dataset.cat;
+    const price     = row.querySelector('td:nth-child(4)')?.textContent?.trim() || '';
+    const imgEl     = row.querySelector('.dt-thumb, .dt-thumb-emoji');
+    const imgHtml   = imgEl?.outerHTML?.replace('style=""','style="opacity:.5"') || '<div class="dt-thumb-emoji" style="opacity:.5">☕</div>';
+    const descEl    = row.querySelector('td:nth-child(2) div:nth-child(2)');
+    const descHtml  = descEl ? descEl.outerHTML : '';
+
+    const newRow = document.createElement('tr');
+    newRow.id = 'row-h-' + id;
+    newRow.dataset.cat  = catId;
+    newRow.dataset.name = name_val.toLowerCase();
+    newRow.innerHTML = `
+        <td>${imgHtml}</td>
+        <td><div style="font-weight:800;color:#94a3b8">${name_val}</div>${descHtml}</td>
+        <td><span class="badge-blue" style="opacity:.6">${catText}</span></td>
+        <td style="font-weight:800;color:#94a3b8">${price}</td>
+        <td><span class="badge-red">Ngừng bán</span></td>
+        <td>
+            <div class="dt-actions" style="justify-content:flex-end">
+                <a href="/Admin/Drink/Edit/${id}" class="dt-btn dt-btn-edit"><i class="fa fa-pen"></i></a>
+                <button class="dt-btn dt-btn-show" onclick="showDrink('${id}','${name_val}')"><i class="fa fa-eye"></i></button>
+                <button class="dt-btn dt-btn-del"  onclick="confirmDel('${id}','${name_val}')"><i class="fa fa-trash"></i></button>
+            </div>
+        </td>`;
+    document.getElementById('tbody-hidden').prepend(newRow);
+
+    // Xoá row khỏi active
+    row.remove();
+
+    // Cập nhật count
+    updateCounts();
+    admToast('👁 Đã ẩn: ' + name_val);
+    switchTab('hidden');
+}
+
+// ===== HIỆN LẠI (chuyển từ hidden → active) =====
+async function showDrink(id, name) {
+    const r = await fetch('/Admin/Drink/SetStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isAvailable: true, isDeleted: false })
+    });
+    const d = await r.json();
+    if (!d.success) { admToast('Lỗi!', false); return; }
+
+    const row = document.getElementById('row-h-' + id);
+    if (!row) { admToast('✅ Đã hiển thị lại!'); setTimeout(() => location.reload(), 600); return; }
+    row.remove();
+    updateCounts();
+    admToast('✅ Đã hiển thị lại!');
+    switchTab('active');
+    setTimeout(() => location.reload(), 800);
+}
+
+// ===== DELETE =====
+function confirmDel(id, name) {
+    pendingDelId = id;
+    document.getElementById('del-name').textContent = name;
+    delModal.show();
+}
+
+document.getElementById('del-confirm-btn').onclick = async () => {
+    const r = await fetch('/Admin/Drink/Delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${pendingDelId}`
+    });
+    const d = await r.json();
+    delModal.hide();
+    if (d.success) {
+        document.getElementById('row-h-' + pendingDelId)?.remove();
+        updateCounts();
+        admToast('🗑️ Đã xoá!');
+    } else admToast('Lỗi!', false);
+};
+
+// ===== UPDATE COUNTS =====
+function updateCounts() {
+    const ca = document.querySelectorAll('#tbody-active tr:not([style*="display: none"])').length;
+    const ch = document.querySelectorAll('#tbody-hidden tr:not([style*="display: none"])').length;
+    document.getElementById('count-active').textContent = ca;
+    document.getElementById('count-hidden').textContent = ch;
+}
+</script>
+}

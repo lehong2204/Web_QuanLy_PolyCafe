@@ -1,0 +1,91 @@
+@model Web_QuanLy_PolyCafe.Models.Drink
+@{
+    ViewData["Title"] = "Thêm đồ uống";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center gap-3 mb-1">
+    <a href="/Admin/Drink" class="btn-adm btn-adm-ghost" style="padding:6px 12px;font-size:12px">
+        <i class="fa fa-arrow-left"></i>
+    </a>
+    <div>
+        <div class="adm-page-title"><i class="fa fa-plus me-2" style="color:var(--green)"></i>Thêm đồ uống</div>
+        <div class="adm-breadcrumb">Admin / Đồ uống / Thêm mới</div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-8">
+        <div class="adm-card">
+            <form method="post" enctype="multipart/form-data" action="/Admin/Drink/Create">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="adm-label">Tên đồ uống <span style="color:red">*</span></label>
+                        <input name="Name" class="adm-input" placeholder="VD: Cà phê sữa đá" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Danh mục <span style="color:red">*</span></label>
+                        <select name="CategoryId" class="adm-input" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            @foreach (var c in (IEnumerable<Web_QuanLy_PolyCafe.Models.Category>)ViewBag.Categories)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Giá (đ) <span style="color:red">*</span></label>
+                        <input name="Price" type="number" class="adm-input" placeholder="0" min="0" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="adm-label">Mô tả</label>
+                        <textarea name="Description" class="adm-input" rows="3" placeholder="Mô tả ngắn về đồ uống..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Ảnh</label>
+                        <input name="imageFile" type="file" class="adm-input" accept="image/*" onchange="previewImg(this)">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="adm-label">Trạng thái</label>
+                        <select name="IsAvailable" class="adm-input">
+                            <option value="true">✅ Đang bán</option>
+                            <option value="false">❌ Tạm ẩn</option>
+                        </select>
+                    </div>
+                    <div class="col-12" id="img-preview-wrap" style="display:none">
+                        <img id="img-preview" style="height:120px;border-radius:10px;object-fit:cover">
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a href="/Admin/Drink" class="btn-adm btn-adm-ghost">Huỷ</a>
+                    <button type="submit" class="btn-adm btn-adm-amber flex-fill">
+                        <i class="fa fa-plus"></i>Thêm đồ uống
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="adm-card text-center" style="color:#94a3b8">
+            <i class="fa fa-circle-info" style="font-size:32px;margin-bottom:10px;opacity:.3"></i>
+            <div style="font-size:12px;line-height:1.6">
+                Sau khi thêm, bạn có thể vào <b>Sửa</b> để thêm các size / topping cho đồ uống này.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function previewImg(input) {
+    const wrap = document.getElementById('img-preview-wrap');
+    const img = document.getElementById('img-preview');
+    if (input.files && input.files[0]) {
+        const r = new FileReader();
+        r.onload = e => { img.src = e.target.result; wrap.style.display='block'; };
+        r.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+}
