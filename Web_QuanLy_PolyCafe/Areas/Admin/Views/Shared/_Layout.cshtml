@@ -184,19 +184,22 @@
             <i class="fa fa-gauge-high"></i>Dashboard
         </a>
 
-        <div class="adm-nav-section">Quản lý</div>
-        <a class="adm-nav-item @(currentController=="Drink"?"active":"")" href="/Admin/Drink">
-            <i class="fa fa-mug-hot"></i>Đồ uống
-        </a>
-        <a class="adm-nav-item @(currentController=="Category"?"active":"")" href="/Admin/Category">
-            <i class="fa fa-tags"></i>Danh mục
-        </a>
-        <a class="adm-nav-item @(currentController=="Order"?"active":"")" href="/Admin/Order">
-            <i class="fa fa-receipt"></i>Đơn hàng
-        </a>
-        <a class="adm-nav-item @(currentController=="User"?"active":"")" href="/Admin/User">
-            <i class="fa fa-users"></i>Người dùng
-        </a>
+            <div class="adm-nav-section">Quản lý</div>
+            <a class="adm-nav-item @(currentController == "Drink" ? "active" : "")" href="/Admin/Drink">
+                <i class="fa fa-mug-hot"></i>Đồ uống
+            </a>
+            <a class="adm-nav-item @(currentController == "Variant" ? "active" : "")" href="/Admin/Variant">
+                <i class="fa fa-sliders"></i>Biến thể
+            </a>
+            <a class="adm-nav-item @(currentController == "Category" ? "active" : "")" href="/Admin/Category">
+                <i class="fa fa-tags"></i>Danh mục
+            </a>
+            <a class="adm-nav-item @(currentController == "Order" ? "active" : "")" href="/Admin/Order">
+                <i class="fa fa-receipt"></i>Đơn hàng
+            </a>
+            <a class="adm-nav-item @(currentController == "User" ? "active" : "")" href="/Admin/User">
+                <i class="fa fa-users"></i>Người dùng
+            </a>
 
         <div class="adm-nav-section">Tài khoản</div>
         <a class="adm-nav-item" href="/Account/Profile">
