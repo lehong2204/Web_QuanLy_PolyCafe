@@ -1,4 +1,4 @@
-@{
+@* @{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
@@ -114,4 +114,527 @@
             </table>
         </div>
     </div>
+</div> *@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var monthlyRevenue = ViewBag.MonthlyRevenue as decimal[];
+}
+
+@section HeadStyles {
+    <style>
+        /* ===== GRADIENT CARDS ===== */
+        .dash-card {
+            border-radius: 16px;
+            border: none;
+            padding: 22px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,.12);
+            color: #fff;
+            min-height: 108px;
+        }
+
+            .dash-card .icon-box {
+                width: 52px;
+                height: 52px;
+                border-radius: 14px;
+                background: rgba(255,255,255,.18);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                flex-shrink: 0;
+            }
+
+            .dash-card .dc-label {
+                font-size: 11px;
+                font-weight: 700;
+                opacity: .8;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+
+            .dash-card .dc-value {
+                font-family: 'Playfair Display', serif;
+                font-size: 26px;
+                font-weight: 700;
+                line-height: 1.1;
+            }
+
+            .dash-card .dc-sub {
+                font-size: 11px;
+                opacity: .7;
+                margin-top: 5px;
+            }
+
+        .gc-purple {
+            background: linear-gradient(135deg, #5b2dd8, #8b5cf6);
+        }
+
+        .gc-blue {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+        }
+
+        .gc-amber {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+
+        .gc-green {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        /* ===== SHARED CARD ===== */
+        .db-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 6px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+
+        .db-card-head {
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .db-card-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--sb);
+        }
+
+        .db-card-body {
+            padding: 18px 20px;
+        }
+
+        .chart-select {
+            padding: 5px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            color: var(--sb);
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+            .chart-select:focus {
+                border-color: var(--amber);
+            }
+
+        /* ===== TOP #1 HIGHLIGHT ===== */
+        .top1-wrap {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+
+        .top1-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #5b21b6;
+        }
+
+        .top1-sub {
+            font-size: 11px;
+            color: #7c3aed;
+            opacity: .8;
+        }
+
+        .top1-val {
+            font-size: 14px;
+            font-weight: 800;
+            color: #5b21b6;
+        }
+
+        /* ===== POPULAR LIST ===== */
+        .pop-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8fafc;
+        }
+
+            .pop-item:last-child {
+                border-bottom: none;
+            }
+
+        .pop-rank {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+
+        .rank-2 {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .rank-3 {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .rank-n {
+            background: #f8fafc;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .pop-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--sb);
+            flex: 1;
+        }
+
+        .pop-badge {
+            font-size: 11px;
+            font-weight: 800;
+            background: #fef3c7;
+            color: #d97706;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ===== 7-DAY BAR ===== */
+        .rev-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+        }
+
+        .rev-date {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--sb);
+            width: 42px;
+            flex-shrink: 0;
+        }
+
+        .rev-bar-wrap {
+            flex: 1;
+            background: #f1f5f9;
+            border-radius: 6px;
+            height: 9px;
+            overflow: hidden;
+        }
+
+        .rev-bar {
+            height: 100%;
+            border-radius: 6px;
+            background: var(--amber);
+        }
+
+        .rev-val {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--amber2);
+            width: 90px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* ===== MINI STATS ===== */
+        .mini-stats {
+            display: flex;
+            border-top: 1px solid var(--border);
+            margin-top: 14px;
+            padding-top: 14px;
+        }
+
+        .mini-stat {
+            flex: 1;
+            text-align: center;
+        }
+
+            .mini-stat + .mini-stat {
+                border-left: 1px solid var(--border);
+            }
+
+        .ms-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--sb);
+        }
+
+        .ms-lbl {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+    </style>
+}
+
+<!-- TITLE -->
+<div class="adm-page-title mb-1"><i class="fa fa-gauge-high me-2" style="color:var(--purple)"></i>Dashboard</div>
+<div class="adm-breadcrumb mb-4">Admin / Tổng quan</div>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="dash-card gc-purple">
+            <div>
+                <div class="dc-label">Total Earning</div>
+                <div class="dc-value" style="font-size:18px">@(((decimal)ViewBag.TotalRevenue).ToString("N0"))đ</div>
+                <div class="dc-sub"><i class="fa fa-arrow-up-right me-1"></i>Tổng doanh thu</div>
+            </div>
+            <div class="icon-box"><i class="fa fa-wallet"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-card gc-blue">
+            <div>
+                <div class="dc-label">Total Orders</div>
+                <div class="dc-value">@ViewBag.TotalOrders</div>
+                <div class="dc-sub"><i class="fa fa-receipt me-1"></i>Đơn hàng</div>
+            </div>
+            <div class="icon-box"><i class="fa fa-receipt"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-card gc-amber">
+            <div>
+                <div class="dc-label">Doanh thu tháng</div>
+                <div class="dc-value" style="font-size:18px">@(((decimal)ViewBag.MonthRevenue).ToString("N0"))đ</div>
+                <div class="dc-sub"><i class="fa fa-calendar me-1"></i>Tháng @DateTime.Today.Month/@DateTime.Today.Year</div>
+            </div>
+            <div class="icon-box"><i class="fa fa-coins"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-card gc-green">
+            <div>
+                <div class="dc-label">Total Users</div>
+                <div class="dc-value">@ViewBag.TotalUsers</div>
+                <div class="dc-sub"><i class="fa fa-users me-1"></i>Người dùng</div>
+            </div>
+            <div class="icon-box"><i class="fa fa-users"></i></div>
+        </div>
+    </div>
 </div>
+
+<!-- ===== CHART + POPULAR ITEMS ===== -->
+<div class="row g-3 mb-3">
+
+    <!-- CHART -->
+    <div class="col-md-8">
+        <div class="db-card h-100">
+            <div class="db-card-head">
+                <div>
+                    <div class="db-card-title">Total Growth</div>
+                    <div style="font-size:11px;color:#94a3b8">Doanh thu theo tháng / năm</div>
+                </div>
+                <select class="chart-select" id="chartType" onchange="switchChart(this.value)">
+                    <option value="month" selected>Theo tháng</option>
+                    <option value="year">Theo năm</option>
+                </select>
+            </div>
+            <div class="db-card-body">
+                <canvas id="revenueChart" height="120"></canvas>
+                <div class="mini-stats">
+                    <div class="mini-stat">
+                        <div class="ms-val">@ViewBag.TotalDrinks</div>
+                        <div class="ms-lbl">Đồ uống</div>
+                    </div>
+                    <div class="mini-stat">
+                        <div class="ms-val">@ViewBag.TotalCategories</div>
+                        <div class="ms-lbl">Danh mục</div>
+                    </div>
+                    <div class="mini-stat">
+                        <div class="ms-val">@ViewBag.TodayOrders</div>
+                        <div class="ms-lbl">Đơn hôm nay</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPULAR ITEMS -->
+    <div class="col-md-4">
+
+        @* TOP 1 với mini chart — y Snakoo *@
+        @if (ViewBag.TopDrinkMain != null)
+        {
+            <div class="top1-wrap">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <div class="top1-name">@ViewBag.TopDrinkMain.Name</div>
+                        <div class="top1-sub">Top bán chạy</div>
+                    </div>
+                    <div class="top1-val">@ViewBag.TopDrinkMain.Total ly</div>
+                </div>
+                <canvas id="topDrinkChart" height="70"></canvas>
+            </div>
+        }
+
+        @* TOP 2-5 *@
+        <div class="db-card">
+            <div class="db-card-head">
+                <span class="db-card-title">Popular Items</span>
+                <a href="/Admin/Drink" style="font-size:11px;color:var(--amber);font-weight:700;text-decoration:none">
+                    View all <i class="fa fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="db-card-body" style="padding-top:6px;padding-bottom:6px">
+                @{
+                    int rank = 2;
+                }
+                @foreach (var item in (dynamic)ViewBag.TopDrinkList)
+                {
+                    var icon = rank == 2 ? "🥈" : rank == 3 ? "🥉" : rank.ToString();
+                    var rankClass = rank == 2 ? "rank-2" : rank == 3 ? "rank-3" : "rank-n";
+                    <div class="pop-item">
+                        <div class="pop-rank @rankClass">@Html.Raw(icon)</div>
+                        <div class="pop-name">@item.Name</div>
+                        <span class="pop-badge">@item.Total ly</span>
+                    </div>
+                    rank++;
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== DOANH THU 7 NGÀY ===== -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="db-card">
+            <div class="db-card-head">
+                <div>
+                    <div class="db-card-title"><i class="fa fa-chart-line me-2" style="color:var(--blue)"></i>Doanh Thu 7 Ngày Gần Nhất</div>
+                    <div style="font-size:11px;color:#94a3b8">
+                        Tổng:
+                        @{
+                            decimal total7 = 0;
+                            foreach (var r in (dynamic)ViewBag.RevenueChart) total7 += (decimal)r.Revenue;
+                        }
+                        <b style="color:var(--amber2)">@total7.ToString("N0")đ</b>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card-body">
+                @{
+                    decimal maxRev = 1;
+                    foreach (var r in (dynamic)ViewBag.RevenueChart)
+                        if ((decimal)r.Revenue > maxRev) maxRev = (decimal)r.Revenue;
+                }
+                @foreach (var r in (dynamic)ViewBag.RevenueChart)
+                {
+                    var pct = (int)(((decimal)r.Revenue / maxRev) * 100);
+                    <div class="rev-row">
+                        <div class="rev-date">@((DateTime)r.Date).ToString("dd/MM")</div>
+                        <div class="rev-bar-wrap"><div class="rev-bar" style="width:@pct%"></div></div>
+                        <div class="rev-val">@(((decimal)r.Revenue).ToString("N0"))đ</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ===== MONTH DATA =====
+        const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const monthData   = [@string.Join(",", monthlyRevenue!)];
+
+        // ===== YEAR DATA =====
+        const yearLabels  = [@Html.Raw(string.Join(",", ((IEnumerable<int>)ViewBag.YearLabels)))];
+        const yearData    = [@Html.Raw(string.Join(",", ((IEnumerable<decimal>)ViewBag.YearRevenue).Select(x => x.ToString("F0"))))];
+
+        // ===== MAIN BAR CHART =====
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        let mainChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: monthData,
+                    backgroundColor: '#7e57c2',
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false },
+                    tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString('vi-VN') + 'đ' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M'
+                                         : v >= 1000    ? (v/1000).toFixed(0)+'k' : v,
+                            font: { size: 11, family: 'Nunito' }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    x: { ticks: { font: { size: 11, family: 'Nunito' } }, grid: { display: false } }
+                }
+            }
+        });
+
+        function switchChart(type) {
+            if (type === 'month') {
+                mainChart.data.labels = monthLabels;
+                mainChart.data.datasets[0].data = monthData;
+                mainChart.data.datasets[0].backgroundColor = '#7e57c2';
+            } else {
+                mainChart.data.labels = yearLabels;
+                mainChart.data.datasets[0].data = yearData;
+                mainChart.data.datasets[0].backgroundColor = '#f59e0b';
+            }
+            mainChart.update();
+        }
+
+        // ===== TOP #1 MINI LINE CHART =====
+        const miniCtx = document.getElementById('topDrinkChart');
+        if (miniCtx) {
+            new Chart(miniCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+                    datasets: [{
+                        data: [12, 18, 10, 22, 16, 25, 20],
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124,58,237,0.2)',
+                        tension: 0.4, fill: true, pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+    </script>
+}

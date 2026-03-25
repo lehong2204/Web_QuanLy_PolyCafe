@@ -1,0 +1,856 @@
+﻿@model IEnumerable<Web_QuanLy_PolyCafe.Models.DrinkVariant>
+@{
+    ViewData["Title"] = "Quản lý biến thể";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var activeVariants = Model.Where(v => v.IsActive).ToList();
+    var inactiveVariants = Model.Where(v => !v.IsActive).ToList();
+}
+
+@section HeadStyles {
+    <style>
+        /* TABS */
+        .var-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .var-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Nunito',sans-serif;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+            .var-tab.active {
+                background: #1e293b;
+                color: #fff;
+            }
+
+            .var-tab:not(.active) {
+                background: #f1f5f9;
+                color: #64748b;
+            }
+
+                .var-tab:not(.active):hover {
+                    background: #e2e8f0;
+                    color: #1e293b;
+                }
+
+        .tab-count {
+            min-width: 22px;
+            height: 22px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 0 6px;
+        }
+
+        .var-tab.active .tab-count {
+            background: var(--purple);
+            color: #fff;
+        }
+
+        .var-tab:not(.active) .tab-count {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        /* PANEL */
+        .var-panel {
+            display: none;
+        }
+
+            .var-panel.show {
+                display: block;
+            }
+
+        /* TABLE */
+        .var-table-wrap {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            overflow: hidden;
+        }
+
+        .var-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .var-table th {
+                background: #f8fafc;
+                padding: 11px 16px;
+                font-size: 11px;
+                font-weight: 800;
+                color: #64748b;
+                text-align: left;
+                border-bottom: 1px solid var(--border);
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+
+            .var-table td {
+                padding: 12px 16px;
+                border-bottom: 1px solid #f8fafc;
+                vertical-align: middle;
+                font-size: 13px;
+                color: #1e293b;
+            }
+
+            .var-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .var-table tr:hover td {
+                background: #fafafa;
+            }
+
+        /* DRINK THUMB */
+        .drink-thumb-wrap {
+            position: relative;
+            width: 46px;
+            height: 46px;
+        }
+
+            .drink-thumb-wrap img {
+                width: 46px;
+                height: 46px;
+                border-radius: 10px;
+                object-fit: cover;
+                display: block;
+            }
+
+        .emoji-wrap {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        /* STATUS BADGE */
+        .status-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: none;
+            font-size: 11px;
+            font-weight: 800;
+            font-family: 'Nunito',sans-serif;
+            cursor: pointer;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+
+            .status-btn.active-var {
+                background: #ede9fe;
+                color: #7c3aed;
+            }
+
+                .status-btn.active-var:hover {
+                    background: #ddd6fe;
+                }
+
+            .status-btn.inactive-var {
+                background: #f1f5f9;
+                color: #64748b;
+            }
+
+                .status-btn.inactive-var:hover {
+                    background: #e2e8f0;
+                }
+
+        /* ACTION BTNS */
+        .dt-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dt-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all .12s;
+        }
+
+        .dt-btn-edit {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+            .dt-btn-edit:hover {
+                background: #e2e8f0;
+                color: #1e293b;
+            }
+
+        .dt-btn-del {
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
+        }
+
+            .dt-btn-del:hover {
+                background: #ffe4e6;
+            }
+
+        .dt-btn-hide {
+            background: #fff7ed;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+        }
+
+            .dt-btn-hide:hover {
+                background: #ffedd5;
+            }
+
+        .dt-btn-show {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+            .dt-btn-show:hover {
+                background: #dcfce7;
+            }
+
+        /* FILTER BAR */
+        .filter-bar {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+            .filter-bar .adm-search {
+                flex: 1;
+            }
+
+        /* EMPTY */
+        .dt-empty {
+            padding: 48px 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+            .dt-empty i {
+                font-size: 40px;
+                opacity: .2;
+                display: block;
+                margin-bottom: 10px;
+            }
+
+        /* MODAL FORM */
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+            .modal-form-grid.full {
+                grid-template-columns: 1fr;
+            }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+            .field-group label {
+                font-size: 11px;
+                font-weight: 700;
+                color: #64748b;
+            }
+
+            .field-group .adm-input {
+                margin: 0;
+            }
+
+        /* EXTRA PRICE BADGE */
+        .extra-price {
+            font-size: 12px;
+            font-weight: 800;
+            color: #7c3aed;
+            background: #ede9fe;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+            .extra-price.free {
+                color: #16a34a;
+                background: #dcfce7;
+            }
+    </style>
+}
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div class="adm-page-title">
+            <i class="fa fa-sliders me-2" style="color:var(--purple)"></i>Quản Lý Biến Thể
+        </div>
+        <div class="adm-breadcrumb">@activeVariants.Count biến thể đang hoạt động</div>
+    </div>
+    <button class="btn-adm btn-adm-amber" onclick="openAddModal()">
+        <i class="fa fa-plus"></i>Thêm Biến Thể
+    </button>
+</div>
+
+<!-- TABS -->
+<div class="var-tabs">
+    <button class="var-tab active" id="tab-active" onclick="switchTab('active')">
+        <i class="fa fa-circle-check"></i>
+        Đang Hoạt Động
+        <span class="tab-count" id="count-active">@activeVariants.Count</span>
+    </button>
+    <button class="var-tab" id="tab-inactive" onclick="switchTab('inactive')">
+        <i class="fa fa-circle-pause"></i>
+        Tạm Ngừng
+        <span class="tab-count" id="count-inactive">@inactiveVariants.Count</span>
+    </button>
+</div>
+
+<!-- ===== PANEL: ĐANG HOẠT ĐỘNG ===== -->
+<div class="var-panel show" id="panel-active">
+    <div class="filter-bar">
+        <div class="adm-search">
+            <i class="fa fa-magnifying-glass"></i>
+            <input class="adm-input" id="search-active" placeholder="Tìm tên biến thể hoặc đồ uống..." oninput="filterTable('active')">
+        </div>
+        <select class="adm-input" style="width:220px" id="drink-active" onchange="filterTable('active')">
+            <option value="">-- Tất cả đồ uống --</option>
+            @foreach (var d in (IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>)ViewBag.Drinks)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </select>
+        <button class="btn-adm btn-adm-ghost" style="padding:8px 12px" onclick="clearFilter('active')" title="Reset">
+            <i class="fa fa-rotate-left"></i>
+        </button>
+    </div>
+
+    <div class="var-table-wrap">
+        <table class="var-table" id="table-active">
+            <thead>
+                <tr>
+                    <th style="width:70px">Ảnh món</th>
+                    <th>Tên đồ uống</th>
+                    <th>Tên biến thể</th>
+                    <th>Giá thêm</th>
+                    <th>Trạng thái</th>
+                    <th style="width:120px;text-align:right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-active">
+                @foreach (var v in activeVariants)
+                {
+                    var emojis = new[] { "☕", "🧋", "🥤", "🍵", "🧃", "🍹", "🥛", "🍫", "🍓", "🥭" };
+                    var bgs = new[] { "#fef3c7", "#ede9fe", "#dbeafe", "#dcfce7", "#fee2e2", "#fce7f3", "#e0f2fe", "#fef9c3", "#f0fdf4", "#fdf4ff" };
+                    var idx = Math.Abs(v.DrinkId.GetHashCode()) % emojis.Length;
+                    var emoji = emojis[idx];
+                    var bg = bgs[idx];
+
+                    <tr id="row-@v.Id" data-name="@v.VariantName.ToLower()" data-drink="@v.DrinkId" data-drinkname="@v.Drink?.Name?.ToLower()">
+                        <td>
+                            <div class="drink-thumb-wrap">
+                                @if (!string.IsNullOrEmpty(v.Drink?.ImageUrl))
+                                {
+                                    <img src="/images/drinks/@v.Drink.ImageUrl" alt="@v.Drink.Name"
+                                         onload="this.nextElementSibling.style.display='none';"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                                    <span class="emoji-wrap" style="background:@bg;display:none;">@emoji</span>
+                                }
+                                else
+                                {
+                                    <span class="emoji-wrap" style="background:@bg;">@emoji</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight:800">@v.Drink?.Name</div>
+                            <div style="font-size:11px;color:#94a3b8">@v.Drink?.Category?.Name</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:700">@v.VariantName</div>
+                        </td>
+                        <td>
+                            @if (v.ExtraPrice == 0)
+                            {
+                                <span class="extra-price free">Miễn phí</span>
+                            }
+                            else
+                            {
+                                <span class="extra-price">+@v.ExtraPrice.ToString("N0")đ</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="status-btn active-var" id="status-@v.Id"
+                                    onclick="toggleActive('@v.Id', this, 'active')"
+                                    title="Đang hoạt động — click để tạm ngừng">
+                                <i class="fa fa-circle-check"></i>Hoạt động
+                            </button>
+                        </td>
+                        <td>
+                            <div class="dt-actions" style="justify-content:flex-end">
+                                <button class="dt-btn dt-btn-edit" title="Sửa biến thể"
+                                        onclick="openEditModal('@v.Id','@v.VariantName','@v.ExtraPrice','@v.DrinkId','@v.Drink?.Name')">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                                <button class="dt-btn dt-btn-del" title="Xoá vĩnh viễn"
+                                        onclick="confirmDel('@v.Id','@v.VariantName')">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!activeVariants.Any())
+        {
+            <div class="dt-empty"><i class="fa fa-sliders"></i>Chưa có biến thể nào đang hoạt động</div>
+        }
+    </div>
+</div>
+
+<!-- ===== PANEL: TẠM NGỪNG ===== -->
+<div class="var-panel" id="panel-inactive">
+    <div class="filter-bar">
+        <div class="adm-search">
+            <i class="fa fa-magnifying-glass"></i>
+            <input class="adm-input" id="search-inactive" placeholder="Tìm tên biến thể hoặc đồ uống..." oninput="filterTable('inactive')">
+        </div>
+        <select class="adm-input" style="width:220px" id="drink-inactive" onchange="filterTable('inactive')">
+            <option value="">-- Tất cả đồ uống --</option>
+            @foreach (var d in (IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>)ViewBag.Drinks)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </select>
+        <button class="btn-adm btn-adm-ghost" style="padding:8px 12px" onclick="clearFilter('inactive')" title="Reset">
+            <i class="fa fa-rotate-left"></i>
+        </button>
+    </div>
+
+    <div class="var-table-wrap">
+        <table class="var-table" id="table-inactive">
+            <thead>
+                <tr>
+                    <th style="width:70px">Ảnh món</th>
+                    <th>Tên đồ uống</th>
+                    <th>Tên biến thể</th>
+                    <th>Giá thêm</th>
+                    <th>Trạng thái</th>
+                    <th style="width:120px;text-align:right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-inactive">
+                @foreach (var v in inactiveVariants)
+                {
+                    var emojis = new[] { "☕", "🧋", "🥤", "🍵", "🧃", "🍹", "🥛", "🍫", "🍓", "🥭" };
+                    var bgs = new[] { "#fef3c7", "#ede9fe", "#dbeafe", "#dcfce7", "#fee2e2", "#fce7f3", "#e0f2fe", "#fef9c3", "#f0fdf4", "#fdf4ff" };
+                    var idx = Math.Abs(v.DrinkId.GetHashCode()) % emojis.Length;
+                    var emoji = emojis[idx];
+                    var bg = bgs[idx];
+
+                    <tr id="row-i-@v.Id" data-name="@v.VariantName.ToLower()" data-drink="@v.DrinkId" data-drinkname="@v.Drink?.Name?.ToLower()">
+                        <td>
+                            <div class="drink-thumb-wrap">
+                                @if (!string.IsNullOrEmpty(v.Drink?.ImageUrl))
+                                {
+                                    <img src="/images/drinks/@v.Drink.ImageUrl" alt="@v.Drink.Name" style="opacity:.5"
+                                         onload="this.nextElementSibling.style.display='none';"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                                    <span class="emoji-wrap" style="background:@bg;opacity:.5;display:none;">@emoji</span>
+                                }
+                                else
+                                {
+                                    <span class="emoji-wrap" style="background:@bg;opacity:.5;">@emoji</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight:800;color:#94a3b8">@v.Drink?.Name</div>
+                            <div style="font-size:11px;color:#cbd5e1">@v.Drink?.Category?.Name</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:700;color:#94a3b8">@v.VariantName</div>
+                        </td>
+                        <td>
+                            @if (v.ExtraPrice == 0)
+                            {
+                                <span class="extra-price free" style="opacity:.6">Miễn phí</span>
+                            }
+                            else
+                            {
+                                <span class="extra-price" style="opacity:.6">+@v.ExtraPrice.ToString("N0")đ</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="status-btn inactive-var" id="status-@v.Id"
+                                    onclick="toggleActive('@v.Id', this, 'inactive')"
+                                    title="Tạm ngừng — click để kích hoạt lại">
+                                <i class="fa fa-circle-pause"></i>Tạm ngừng
+                            </button>
+                        </td>
+                        <td>
+                            <div class="dt-actions" style="justify-content:flex-end">
+                                <button class="dt-btn dt-btn-edit" title="Sửa biến thể"
+                                        onclick="openEditModal('@v.Id','@v.VariantName','@v.ExtraPrice','@v.DrinkId','@v.Drink?.Name')">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                                <button class="dt-btn dt-btn-del" title="Xoá vĩnh viễn"
+                                        onclick="confirmDel('@v.Id','@v.VariantName')">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!inactiveVariants.Any())
+        {
+            <div class="dt-empty"><i class="fa fa-circle-pause"></i>Không có biến thể nào tạm ngừng</div>
+        }
+    </div>
+</div>
+
+<!-- ===== MODAL THÊM BIẾN THỂ ===== -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+        <div class="modal-content p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <div style="font-size:15px;font-weight:800;color:#1e293b">
+                        <i class="fa fa-plus-circle me-2" style="color:var(--amber)"></i>Thêm Biến Thể Mới
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px">Thêm size, tùy chọn cho đồ uống</div>
+                </div>
+                <button type="button" class="btn-adm btn-adm-ghost" style="padding:6px 10px" data-bs-dismiss="modal">
+                    <i class="fa fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="field-group mb-3">
+                <label>Đồ uống <span style="color:#e11d48">*</span></label>
+                <select class="adm-input" id="add-drinkId">
+                    <option value="">-- Chọn đồ uống --</option>
+                    @foreach (var d in (IEnumerable<Web_QuanLy_PolyCafe.Models.Drink>)ViewBag.Drinks)
+                    {
+                        <option value="@d.Id" data-img="@d.ImageUrl" data-name="@d.Name">@d.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="modal-form-grid">
+                <div class="field-group">
+                    <label>Tên biến thể <span style="color:#e11d48">*</span></label>
+                    <input class="adm-input" id="add-variantName" placeholder="VD: Size M, Ít đường...">
+                </div>
+                <div class="field-group">
+                    <label>Giá thêm (đ)</label>
+                    <input class="adm-input" id="add-extraPrice" type="number" min="0" step="1000" placeholder="0 = Miễn phí" value="0">
+                </div>
+            </div>
+
+            <div id="add-error" style="display:none;font-size:12px;color:#e11d48;margin-bottom:12px;padding:8px 12px;background:#fee2e2;border-radius:8px;"></div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                <button class="btn-adm btn-adm-amber flex-fill" id="add-confirm-btn" onclick="submitAdd()">
+                    <i class="fa fa-plus"></i>Thêm biến thể
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL SỬA BIẾN THỂ ===== -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+        <div class="modal-content p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <div style="font-size:15px;font-weight:800;color:#1e293b">
+                        <i class="fa fa-pen me-2" style="color:var(--blue)"></i>Sửa Biến Thể
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="edit-drink-label">—</div>
+                </div>
+                <button type="button" class="btn-adm btn-adm-ghost" style="padding:6px 10px" data-bs-dismiss="modal">
+                    <i class="fa fa-xmark"></i>
+                </button>
+            </div>
+
+            <input type="hidden" id="edit-id">
+
+            <div class="modal-form-grid">
+                <div class="field-group">
+                    <label>Tên biến thể <span style="color:#e11d48">*</span></label>
+                    <input class="adm-input" id="edit-variantName" placeholder="VD: Size M, Ít đường...">
+                </div>
+                <div class="field-group">
+                    <label>Giá thêm (đ)</label>
+                    <input class="adm-input" id="edit-extraPrice" type="number" min="0" step="1000" value="0">
+                </div>
+            </div>
+
+            <div id="edit-error" style="display:none;font-size:12px;color:#e11d48;margin-bottom:12px;padding:8px 12px;background:#fee2e2;border-radius:8px;"></div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                <button class="btn-adm btn-adm-primary flex-fill" onclick="submitEdit()">
+                    <i class="fa fa-floppy-disk"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL XOÁ ===== -->
+<div class="modal fade" id="delModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content p-4 text-center">
+            <div style="font-size:36px;margin-bottom:10px">🗑️</div>
+            <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:6px">Xoá vĩnh viễn?</div>
+            <div id="del-name" style="font-size:13px;color:#64748b;margin-bottom:6px"></div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:18px">Không thể hoàn tác!</div>
+            <div class="d-flex gap-2">
+                <button class="btn-adm btn-adm-ghost flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                <button class="btn-adm btn-adm-red flex-fill" id="del-confirm-btn">Xoá</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const addModal  = new bootstrap.Modal(document.getElementById('addModal'));
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        const delModal  = new bootstrap.Modal(document.getElementById('delModal'));
+        let pendingDelId = null;
+
+        // ===== TAB SWITCH =====
+        function switchTab(tab) {
+            document.querySelectorAll('.var-panel').forEach(p => p.classList.remove('show'));
+            document.querySelectorAll('.var-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + tab).classList.add('show');
+            document.getElementById('tab-'   + tab).classList.add('active');
+        }
+
+        // ===== FILTER =====
+        function filterTable(tab) {
+            const q    = (document.getElementById('search-' + tab)?.value || '').toLowerCase();
+            const drk  = document.getElementById('drink-' + tab)?.value || '';
+            const tbody = tab === 'active' ? 'tbody-active' : 'tbody-inactive';
+            document.querySelectorAll('#' + tbody + ' tr').forEach(r => {
+                const nameMatch  = r.dataset.name?.includes(q) || r.dataset.drinkname?.includes(q);
+                const drinkMatch = !drk || r.dataset.drink === drk;
+                r.style.display  = (nameMatch && drinkMatch) ? '' : 'none';
+            });
+            updateCounts();
+        }
+
+        function clearFilter(tab) {
+            document.getElementById('search-' + tab).value = '';
+            document.getElementById('drink-'  + tab).value = '';
+            filterTable(tab);
+        }
+
+        // ===== TOGGLE ACTIVE =====
+        async function toggleActive(id, btn, currentTab) {
+            const isActive = btn.classList.contains('active-var');
+            const newActive = !isActive;
+
+            const r = await fetch('/Admin/Variant/ToggleActive', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, isActive: newActive })
+            });
+            const d = await r.json();
+            if (!d.success) { admToast('Lỗi!', false); return; }
+
+            // Move row between tabs
+            const rowId = currentTab === 'active' ? 'row-' + id : 'row-i-' + id;
+            const row   = document.getElementById(rowId);
+
+            if (newActive) {
+                // inactive → active
+                if (row) {
+                    row.id = 'row-' + id;
+                    // update image opacity
+                    const img = row.querySelector('img');
+                    const emo = row.querySelector('.emoji-wrap');
+                    if (img) img.style.opacity = '';
+                    if (emo) emo.style.opacity = '';
+                    // update text color
+                    row.querySelectorAll('[style*="color:#94a3b8"]').forEach(el => el.style.color = '#1e293b');
+                    row.querySelectorAll('[style*="color:#cbd5e1"]').forEach(el => el.style.color = '#94a3b8');
+                    // update button
+                    btn.className = 'status-btn active-var';
+                    btn.title     = 'Đang hoạt động — click để tạm ngừng';
+                    btn.innerHTML = '<i class="fa fa-circle-check"></i>Hoạt động';
+                    btn.setAttribute('onclick', `toggleActive('${id}', this, 'active')`);
+                    document.getElementById('tbody-active').prepend(row);
+                }
+                admToast('✅ Đã kích hoạt lại!');
+                switchTab('active');
+            } else {
+                // active → inactive
+                if (row) {
+                    row.id = 'row-i-' + id;
+                    const img = row.querySelector('img');
+                    const emo = row.querySelector('.emoji-wrap');
+                    if (img) img.style.opacity = '.5';
+                    if (emo) emo.style.opacity = '.5';
+                    row.querySelectorAll('div[style*="font-weight:800"]').forEach(el => el.style.color = '#94a3b8');
+                    row.querySelectorAll('div[style*="font-weight:700"]').forEach(el => el.style.color = '#94a3b8');
+                    btn.className = 'status-btn inactive-var';
+                    btn.title     = 'Tạm ngừng — click để kích hoạt lại';
+                    btn.innerHTML = '<i class="fa fa-circle-pause"></i>Tạm ngừng';
+                    btn.setAttribute('onclick', `toggleActive('${id}', this, 'inactive')`);
+                    document.getElementById('tbody-inactive').prepend(row);
+                }
+                admToast('⏸ Đã tạm ngừng!');
+                switchTab('inactive');
+            }
+            updateCounts();
+        }
+
+        // ===== OPEN ADD MODAL =====
+        function openAddModal() {
+            document.getElementById('add-drinkId').value    = '';
+            document.getElementById('add-variantName').value = '';
+            document.getElementById('add-extraPrice').value  = '0';
+            document.getElementById('add-error').style.display = 'none';
+            addModal.show();
+        }
+
+        // ===== SUBMIT ADD =====
+        async function submitAdd() {
+            const drinkId     = document.getElementById('add-drinkId').value.trim();
+            const variantName = document.getElementById('add-variantName').value.trim();
+            const extraPrice  = parseFloat(document.getElementById('add-extraPrice').value) || 0;
+            const errEl       = document.getElementById('add-error');
+
+            if (!drinkId)     { errEl.textContent = 'Vui lòng chọn đồ uống!'; errEl.style.display = ''; return; }
+            if (!variantName) { errEl.textContent = 'Tên biến thể không được trống!'; errEl.style.display = ''; return; }
+            errEl.style.display = 'none';
+
+            const btn = document.getElementById('add-confirm-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>Đang thêm...';
+
+            const r = await fetch('/Admin/Variant/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ drinkId, variantName, extraPrice })
+            });
+            const d = await r.json();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-plus"></i>Thêm biến thể';
+
+            if (!d.success) { errEl.textContent = d.message || 'Lỗi!'; errEl.style.display = ''; return; }
+
+            addModal.hide();
+            admToast('✅ Đã thêm biến thể!');
+            setTimeout(() => location.reload(), 600);
+        }
+
+        // ===== OPEN EDIT MODAL =====
+        function openEditModal(id, name, price, drinkId, drinkName) {
+            document.getElementById('edit-id').value          = id;
+            document.getElementById('edit-variantName').value  = name;
+            document.getElementById('edit-extraPrice').value   = price;
+            document.getElementById('edit-drink-label').textContent = drinkName || '';
+            document.getElementById('edit-error').style.display = 'none';
+            editModal.show();
+        }
+
+        // ===== SUBMIT EDIT =====
+        async function submitEdit() {
+            const id          = document.getElementById('edit-id').value;
+            const variantName = document.getElementById('edit-variantName').value.trim();
+            const extraPrice  = parseFloat(document.getElementById('edit-extraPrice').value) || 0;
+            const errEl       = document.getElementById('edit-error');
+
+            if (!variantName) { errEl.textContent = 'Tên biến thể không được trống!'; errEl.style.display = ''; return; }
+            errEl.style.display = 'none';
+
+            const r = await fetch('/Admin/Variant/Edit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, variantName, extraPrice })
+            });
+            const d = await r.json();
+
+            if (!d.success) { errEl.textContent = d.message || 'Lỗi!'; errEl.style.display = ''; return; }
+
+            editModal.hide();
+            admToast('✅ Đã cập nhật biến thể!');
+            setTimeout(() => location.reload(), 600);
+        }
+
+        // ===== DELETE =====
+        function confirmDel(id, name) {
+            pendingDelId = id;
+            document.getElementById('del-name').textContent = name;
+            delModal.show();
+        }
+
+        document.getElementById('del-confirm-btn').onclick = async () => {
+            const r = await fetch('/Admin/Variant/Delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${pendingDelId}`
+            });
+            const d = await r.json();
+            delModal.hide();
+            if (d.success) {
+                document.getElementById('row-'   + pendingDelId)?.remove();
+                document.getElementById('row-i-' + pendingDelId)?.remove();
+                updateCounts();
+                admToast('🗑️ Đã xoá biến thể!');
+            } else admToast(d.message || 'Lỗi!', false);
+        };
+
+        // ===== UPDATE COUNTS =====
+        function updateCounts() {
+            const ca = document.querySelectorAll('#tbody-active   tr:not([style*="display: none"])').length;
+            const ci = document.querySelectorAll('#tbody-inactive tr:not([style*="display: none"])').length;
+            document.getElementById('count-active').textContent   = ca;
+            document.getElementById('count-inactive').textContent = ci;
+        }
+    </script>
+}
