@@ -221,7 +221,8 @@
         </div>
 
         <div class="text-end mb-3">
-            <a href="#" class="text-decoration-none small text-danger">Quên mật khẩu?</a>
+            <a asp-controller="Account" asp-action="ForgotPassword"
+               class="text-decoration-none small text-danger">Quên mật khẩu?</a>
         </div>
 
         @if (ViewBag.Error != null)
