@@ -12,7 +12,7 @@ using Web_QuanLy_PolyCafe.Data;
 namespace Web_QuanLy_PolyCafe.Migrations
 {
     [DbContext(typeof(PolyCafeDbContext))]
-    [Migration("20260317021657_InitPolyCafe")]
+    [Migration("20260406005525_InitPolyCafe")]
     partial class InitPolyCafe
     {
         /// <inheritdoc />

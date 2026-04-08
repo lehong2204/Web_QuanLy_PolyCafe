@@ -12,7 +12,7 @@ namespace Web_QuanLy_PolyCafe.Services
             _config = config;
         }
 
-        public async Task SendAsync(string toEmail, string subject, string body)
+        public virtual async Task SendAsync(string toEmail, string subject, string body)
         {
             var s = _config.GetSection("EmailSettings");
 
