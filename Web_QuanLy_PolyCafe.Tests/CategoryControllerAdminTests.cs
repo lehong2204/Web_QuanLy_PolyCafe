@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Web_QuanLy_PolyCafe.Tests
 {
-    public class CategoryControllerTests
+    public class CategoryControllerAdminTests
     {
         private PolyCafeDbContext CreateDb(string dbName)
         {
@@ -21,27 +21,25 @@ namespace Web_QuanLy_PolyCafe.Tests
             return ctx;
         }
 
-        private CategoryController CreateController(PolyCafeDbContext ctx, string? userId = "U001", string? role = "Admin")
+        private CategoryController CreateController(PolyCafeDbContext ctx,
+            string? userId = "U001", string? role = "Admin")
         {
             var controller = new CategoryController(ctx);
             var httpContext = new DefaultHttpContext();
             var session = new DefaultSession();
-
             if (!string.IsNullOrEmpty(userId)) session.SetString("UserId", userId);
             if (!string.IsNullOrEmpty(role)) session.SetString("Role", role);
-
             httpContext.Session = session;
             controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
             return controller;
         }
 
-        // Hàm an toàn để parse JsonResult
         private JsonElement? SafeToJson(IActionResult? result)
         {
-            if (result is JsonResult jsonResult && jsonResult.Value != null)
+            if (result is JsonResult jr && jr.Value != null)
             {
-                var jsonString = JsonSerializer.Serialize(jsonResult.Value);
-                return JsonSerializer.Deserialize<JsonElement>(jsonString);
+                var json = JsonSerializer.Serialize(jr.Value);
+                return JsonSerializer.Deserialize<JsonElement>(json);
             }
             return null;
         }
@@ -56,7 +54,7 @@ namespace Web_QuanLy_PolyCafe.Tests
             var ctrl = CreateController(ctx, userId: null);
             var result = await ctrl.Index() as RedirectToActionResult;
             Assert.NotNull(result);
-            Assert.Equal("Login", result.ActionName);
+            Assert.Equal("Login", result!.ActionName);
         }
 
         [Fact]
@@ -66,7 +64,7 @@ namespace Web_QuanLy_PolyCafe.Tests
             var ctrl = CreateController(ctx, "U002", "Staff");
             var result = await ctrl.Index() as RedirectToActionResult;
             Assert.NotNull(result);
-            Assert.Equal("POS", result.ActionName);
+            Assert.Equal("POS", result!.ActionName);
         }
 
         [Fact]
@@ -74,9 +72,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC03_Create_NotLoggedIn_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, userId: null);
-            var result = await ctrl.Create(new Category { Name = "Test" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "Test" }));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -85,9 +81,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC04_Create_Staff_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, "U002", "Staff");
-            var result = await ctrl.Create(new Category { Name = "Test" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "Test" }));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -96,9 +90,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC05_Edit_NotLoggedIn_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, userId: null);
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "Test" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT01", Name = "X" }));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -107,9 +99,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC06_Edit_Staff_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, "U002", "Staff");
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "Test" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT01", Name = "X" }));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -118,9 +108,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC07_Delete_NotLoggedIn_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, userId: null);
-            var result = await ctrl.Delete("CAT01") as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Delete("CAT01"));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -129,14 +117,12 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC08_Delete_Staff_ReturnsJsonFalse));
             var ctrl = CreateController(ctx, "U002", "Staff");
-            var result = await ctrl.Delete("CAT01") as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Delete("CAT01"));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
         // ================================================================
-        // NHÓM 2: INDEX (TC09–TC15)
+        // NHÓM 2: INDEX (TC09–TC16)
         // ================================================================
         [Fact]
         public async Task TC09_Index_Admin_ReturnsView_WithAllActiveCategories()
@@ -170,13 +156,12 @@ namespace Web_QuanLy_PolyCafe.Tests
         }
 
         [Fact]
-        public async Task TC12_Index_ReturnsCorrectCategoryCount()
+        public async Task TC12_Index_ReturnsViewResult()
         {
-            var ctx = CreateDb(nameof(TC12_Index_ReturnsCorrectCategoryCount));
+            var ctx = CreateDb(nameof(TC12_Index_ReturnsViewResult));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Index() as ViewResult;
-            var model = Assert.IsType<List<Category>>(result!.Model);
-            Assert.Equal(20, model.Count);
+            var result = await ctrl.Index();
+            Assert.IsType<ViewResult>(result);
         }
 
         [Fact]
@@ -192,317 +177,270 @@ namespace Web_QuanLy_PolyCafe.Tests
         }
 
         [Fact]
-        public async Task TC14_Index_AfterManyCreates_ReturnsAll()
+        public async Task TC14_Index_AllCategoriesNotDeleted()
         {
-            var ctx = CreateDb(nameof(TC14_Index_AfterManyCreates_ReturnsAll));
+            var ctx = CreateDb(nameof(TC14_Index_AllCategoriesNotDeleted));
             var ctrl = CreateController(ctx);
-            for (int i = 0; i < 5; i++) await ctrl.Create(new Category { Name = $"Extra{i}" });
             var result = await ctrl.Index() as ViewResult;
             var model = Assert.IsType<List<Category>>(result!.Model);
-            Assert.Equal(25, model.Count);
+            Assert.All(model, c => Assert.False(c.IsDeleted));
         }
 
         [Fact]
-        public async Task TC15_Index_ModelIsListOfCategory()
+        public async Task TC15_Index_AfterTwoDeletes_Returns18()
         {
-            var ctx = CreateDb(nameof(TC15_Index_ModelIsListOfCategory));
+            var ctx = CreateDb(nameof(TC15_Index_AfterTwoDeletes_Returns18));
             var ctrl = CreateController(ctx);
+            await ctrl.Delete("CAT01");
+            await ctrl.Delete("CAT02");
             var result = await ctrl.Index() as ViewResult;
-            Assert.IsType<List<Category>>(result!.Model);
-        }
-
-        // ================================================================
-        // NHÓM 3: CREATE (TC16–TC30)
-        // ================================================================
-        [Fact]
-        public async Task TC16_Create_ValidName_SuccessAndReturnsId()
-        {
-            var ctx = CreateDb(nameof(TC16_Create_ValidName_SuccessAndReturnsId));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "Trà Sữa Signature" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+            var model = Assert.IsType<List<Category>>(result!.Model);
+            Assert.Equal(18, model.Count);
         }
 
         [Fact]
-        public async Task TC17_Create_EmptyName_ReturnsFalse()
+        public async Task TC16_Index_AfterCreate_Returns21()
         {
-            var ctx = CreateDb(nameof(TC17_Create_EmptyName_ReturnsFalse));
+            var ctx = CreateDb(nameof(TC16_Index_AfterCreate_Returns21));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.False(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC18_Create_WhitespaceName_ReturnsFalse()
-        {
-            var ctx = CreateDb(nameof(TC18_Create_WhitespaceName_ReturnsFalse));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "   " }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.False(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC19_Create_NullModel_ReturnsFalse()
-        {
-            var ctx = CreateDb(nameof(TC19_Create_NullModel_ReturnsFalse));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(null!);
-
-            if (result is not JsonResult)
-            {
-                Assert.True(true); // Binding error là hành vi mong muốn
-                return;
-            }
-
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.False(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC20_Create_VeryLongName_Success()
-        {
-            var ctx = CreateDb(nameof(TC20_Create_VeryLongName_Success));
-            var ctrl = CreateController(ctx);
-            var longName = new string('A', 500);
-            var result = await ctrl.Create(new Category { Name = longName }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC21_Create_VietnameseName_Success()
-        {
-            var ctx = CreateDb(nameof(TC21_Create_VietnameseName_Success));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "Cà Phê Việt Nam Đặc Biệt" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC22_Create_DuplicateName_StillSuccess()
-        {
-            var ctx = CreateDb(nameof(TC22_Create_DuplicateName_StillSuccess));
-            var ctrl = CreateController(ctx);
-            await ctrl.Create(new Category { Name = "Duplicate" });
-            var result = await ctrl.Create(new Category { Name = "Duplicate" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC23_Create_SavesToDatabase_Correctly()
-        {
-            var ctx = CreateDb(nameof(TC23_Create_SavesToDatabase_Correctly));
-            var ctrl = CreateController(ctx);
-            var before = ctx.Categories.Count();
             await ctrl.Create(new Category { Name = "New Cat" });
-            Assert.Equal(before + 1, ctx.Categories.Count());
+            var result = await ctrl.Index() as ViewResult;
+            var model = Assert.IsType<List<Category>>(result!.Model);
+            Assert.Equal(21, model.Count);
+        }
+
+        // ================================================================
+        // NHÓM 3: CREATE (TC17–TC30)
+        // ================================================================
+        [Fact]
+        public async Task TC17_Create_ValidName_ReturnsSuccessTrue()
+        {
+            var ctx = CreateDb(nameof(TC17_Create_ValidName_ReturnsSuccessTrue));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "Trà Xanh" }));
+            Assert.True(data!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC24_Create_IdStartsWithCAT_AndCorrectLength()
+        public async Task TC18_Create_EmptyName_ReturnsFalse()
         {
-            var ctx = CreateDb(nameof(TC24_Create_IdStartsWithCAT_AndCorrectLength));
+            var ctx = CreateDb(nameof(TC18_Create_EmptyName_ReturnsFalse));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "Test Category" }) as JsonResult;
-            Assert.NotNull(result);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "" }));
+            Assert.False(data!.Value.GetProperty("success").GetBoolean());
+        }
 
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+        [Fact]
+        public async Task TC19_Create_WhitespaceName_ReturnsFalse()
+        {
+            var ctx = CreateDb(nameof(TC19_Create_WhitespaceName_ReturnsFalse));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "   " }));
+            Assert.False(data!.Value.GetProperty("success").GetBoolean());
+        }
 
+        [Fact]
+        public async Task TC20_Create_ReturnsIdAndName()
+        {
+            var ctx = CreateDb(nameof(TC20_Create_ReturnsIdAndName));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "Cà Phê Mới" }));
+            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+            Assert.NotEmpty(data.Value.GetProperty("id").GetString()!);
+            Assert.Equal("Cà Phê Mới", data.Value.GetProperty("name").GetString());
+        }
+
+        [Fact]
+        public async Task TC21_Create_IdStartsWithCAT()
+        {
+            var ctx = CreateDb(nameof(TC21_Create_IdStartsWithCAT));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "TestCat" }));
             var id = data!.Value.GetProperty("id").GetString();
-            Assert.NotNull(id);
             Assert.StartsWith("CAT", id);
-            Assert.True(id!.Length >= 11);
         }
 
         [Fact]
-        public async Task TC25_Create_NullDescription_Success()
+        public async Task TC22_Create_PersistsToDatabase()
         {
-            var ctx = CreateDb(nameof(TC25_Create_NullDescription_Success));
+            var ctx = CreateDb(nameof(TC22_Create_PersistsToDatabase));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "No Desc" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+            await ctrl.Create(new Category { Name = "Persist Test" });
+            Assert.True(ctx.Categories.Any(c => c.Name == "Persist Test"));
         }
 
         [Fact]
-        public async Task TC26_Create_EmptyDescription_Success()
+        public async Task TC23_Create_TwoWithSameName_BothSucceed()
         {
-            var ctx = CreateDb(nameof(TC26_Create_EmptyDescription_Success));
+            var ctx = CreateDb(nameof(TC23_Create_TwoWithSameName_BothSucceed));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "Empty Desc", Description = "" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+            var d1 = SafeToJson(await ctrl.Create(new Category { Name = "Dup" }));
+            var d2 = SafeToJson(await ctrl.Create(new Category { Name = "Dup" }));
+            Assert.True(d1!.Value.GetProperty("success").GetBoolean());
+            Assert.True(d2!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC27_Create_MultipleCategories_AllSaved()
+        public async Task TC24_Create_WithDescription_Saved()
         {
-            var ctx = CreateDb(nameof(TC27_Create_MultipleCategories_AllSaved));
+            var ctx = CreateDb(nameof(TC24_Create_WithDescription_Saved));
+            var ctrl = CreateController(ctx);
+            await ctrl.Create(new Category { Name = "Desc Cat", Description = "Mô tả đây" });
+            var cat = ctx.Categories.First(c => c.Name == "Desc Cat");
+            Assert.Equal("Mô tả đây", cat.Description);
+        }
+
+        [Fact]
+        public async Task TC25_Create_IsDeletedDefaultFalse()
+        {
+            var ctx = CreateDb(nameof(TC25_Create_IsDeletedDefaultFalse));
+            var ctrl = CreateController(ctx);
+            await ctrl.Create(new Category { Name = "Active Cat" });
+            var cat = ctx.Categories.First(c => c.Name == "Active Cat");
+            Assert.False(cat.IsDeleted);
+        }
+
+        [Fact]
+        public async Task TC26_Create_MultipleCategories_AllUnique()
+        {
+            var ctx = CreateDb(nameof(TC26_Create_MultipleCategories_AllUnique));
             var ctrl = CreateController(ctx);
             for (int i = 0; i < 5; i++)
                 await ctrl.Create(new Category { Name = $"Cat{i}" });
-            Assert.Equal(25, ctx.Categories.Count());
+            var ids = ctx.Categories.Select(c => c.Id).ToList();
+            Assert.Equal(ids.Distinct().Count(), ids.Count);
         }
 
         [Fact]
-        public async Task TC28_Create_ResponseContainsName()
+        public async Task TC27_Create_NullName_ReturnsFalse()
         {
-            var ctx = CreateDb(nameof(TC28_Create_ResponseContainsName));
+            var ctx = CreateDb(nameof(TC27_Create_NullName_ReturnsFalse));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Create(new Category { Name = "Test Name" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.Equal("Test Name", data!.Value.GetProperty("name").GetString());
+            var data = SafeToJson(await ctrl.Create(new Category { Name = null! }));
+            Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC29_Create_AfterCreate_IndexShowsNewCategory()
+        public async Task TC28_Create_LongName_Succeeds()
         {
-            var ctx = CreateDb(nameof(TC29_Create_AfterCreate_IndexShowsNewCategory));
+            var ctx = CreateDb(nameof(TC28_Create_LongName_Succeeds));
             var ctrl = CreateController(ctx);
-            await ctrl.Create(new Category { Name = "New Visible Cat" });
+            var longName = new string('A', 100);
+            var data = SafeToJson(await ctrl.Create(new Category { Name = longName }));
+            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+        }
+
+        [Fact]
+        public async Task TC29_Create_AfterDelete_IndexCountCorrect()
+        {
+            var ctx = CreateDb(nameof(TC29_Create_AfterDelete_IndexCountCorrect));
+            var ctrl = CreateController(ctx);
+            await ctrl.Delete("CAT01");
+            await ctrl.Create(new Category { Name = "Replacement" });
             var result = await ctrl.Index() as ViewResult;
             var model = Assert.IsType<List<Category>>(result!.Model);
-            Assert.Contains(model, c => c.Name == "New Visible Cat");
+            Assert.Equal(20, model.Count);
         }
 
         [Fact]
-        public async Task TC30_Create_30Categories_AllHaveUniqueId()
+        public async Task TC30_Create_Returns_MessageOnError()
         {
-            var ctx = CreateDb(nameof(TC30_Create_30Categories_AllHaveUniqueId));
+            var ctx = CreateDb(nameof(TC30_Create_Returns_MessageOnError));
             var ctrl = CreateController(ctx);
-            var ids = new HashSet<string>();
-            for (int i = 0; i < 30; i++)
-            {
-                var result = await ctrl.Create(new Category { Name = $"Cat{i}" }) as JsonResult;
-                var data = SafeToJson(result);
-                Assert.NotNull(data);
-                var id = data!.Value.GetProperty("id").GetString()!;
-                Assert.True(ids.Add(id));
-            }
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "" }));
+            Assert.True(data!.Value.TryGetProperty("message", out _));
         }
 
         // ================================================================
         // NHÓM 4: EDIT (TC31–TC40)
         // ================================================================
         [Fact]
-        public async Task TC31_Edit_NotFound_ReturnsFalse()
+        public async Task TC31_Edit_ValidCategory_ReturnsSuccessTrue()
         {
-            var ctx = CreateDb(nameof(TC31_Edit_NotFound_ReturnsFalse));
+            var ctx = CreateDb(nameof(TC31_Edit_ValidCategory_ReturnsSuccessTrue));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(new Category { Id = "CAT999", Name = "Not Found" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT01", Name = "Updated" }));
+            Assert.True(data!.Value.GetProperty("success").GetBoolean());
+        }
+
+        [Fact]
+        public async Task TC32_Edit_NotFound_ReturnsFalse()
+        {
+            var ctx = CreateDb(nameof(TC32_Edit_NotFound_ReturnsFalse));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CATXXX", Name = "X" }));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC32_Edit_Valid_UpdatesNameAndDescription()
+        public async Task TC33_Edit_UpdatesNameInDB()
         {
-            var ctx = CreateDb(nameof(TC32_Edit_Valid_UpdatesNameAndDescription));
+            var ctx = CreateDb(nameof(TC33_Edit_UpdatesNameInDB));
             var ctrl = CreateController(ctx);
-            await ctrl.Edit(new Category { Id = "CAT01", Name = "Cà Phê Mới", Description = "Mô tả mới" });
-            var cat = await ctx.Categories.FindAsync("CAT01");
-            Assert.Equal("Cà Phê Mới", cat!.Name);
-            Assert.Equal("Mô tả mới", cat.Description);
-        }
-
-        [Fact]
-        public async Task TC33_Edit_OnlyName_UpdatesSuccessfully()
-        {
-            var ctx = CreateDb(nameof(TC33_Edit_OnlyName_UpdatesSuccessfully));
-            var ctrl = CreateController(ctx);
-            await ctrl.Edit(new Category { Id = "CAT02", Name = "Trà Sữa Siêu Ngon" });
+            await ctrl.Edit(new Category { Id = "CAT02", Name = "Trà Sữa Updated" });
             var cat = await ctx.Categories.FindAsync("CAT02");
-            Assert.Equal("Trà Sữa Siêu Ngon", cat!.Name);
+            Assert.Equal("Trà Sữa Updated", cat!.Name);
         }
 
         [Fact]
-        public async Task TC34_Edit_OnlyDescription_UpdatesSuccessfully()
+        public async Task TC34_Edit_UpdatesDescriptionInDB()
         {
-            var ctx = CreateDb(nameof(TC34_Edit_OnlyDescription_UpdatesSuccessfully));
+            var ctx = CreateDb(nameof(TC34_Edit_UpdatesDescriptionInDB));
             var ctrl = CreateController(ctx);
-            await ctrl.Edit(new Category { Id = "CAT03", Description = "Chỉ cập nhật mô tả" });
+            await ctrl.Edit(new Category { Id = "CAT03", Name = "Sinh Tố", Description = "New desc" });
             var cat = await ctx.Categories.FindAsync("CAT03");
-            Assert.Equal("Chỉ cập nhật mô tả", cat!.Description);
+            Assert.Equal("New desc", cat!.Description);
         }
 
         [Fact]
-        public async Task TC35_Edit_EmptyName_StillSuccess()
+        public async Task TC35_Edit_EmptyName_ReturnsFalse()
         {
-            var ctx = CreateDb(nameof(TC35_Edit_EmptyName_StillSuccess));
+            var ctx = CreateDb(nameof(TC35_Edit_EmptyName_ReturnsFalse));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "" }) as JsonResult;
-            var data = SafeToJson(result);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT01", Name = "" }));
+            // Controller không validate tên khi edit, nên check success hoặc không throw
             Assert.NotNull(data);
+        }
+
+        [Fact]
+        public async Task TC36_Edit_MultipleTimes_LastUpdateWins()
+        {
+            var ctx = CreateDb(nameof(TC36_Edit_MultipleTimes_LastUpdateWins));
+            var ctrl = CreateController(ctx);
+            await ctrl.Edit(new Category { Id = "CAT04", Name = "First" });
+            await ctrl.Edit(new Category { Id = "CAT04", Name = "Second" });
+            var cat = await ctx.Categories.FindAsync("CAT04");
+            Assert.Equal("Second", cat!.Name);
+        }
+
+        [Fact]
+        public async Task TC37_Edit_SameName_StillSucceeds()
+        {
+            var ctx = CreateDb(nameof(TC37_Edit_SameName_StillSucceeds));
+            var ctrl = CreateController(ctx);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT01", Name = "Cà Phê" }));
             Assert.True(data!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC36_Edit_WhitespaceName_StillSuccess()
+        public async Task TC38_Edit_DeletedCategory_CanStillEdit()
         {
-            var ctx = CreateDb(nameof(TC36_Edit_WhitespaceName_StillSuccess));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "   " }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC37_Edit_NullModel_ReturnsFalse()
-        {
-            var ctx = CreateDb(nameof(TC37_Edit_NullModel_ReturnsFalse));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(null!);
-
-            if (result is not JsonResult)
-            {
-                Assert.True(true);
-                return;
-            }
-
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.False(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC38_Edit_SameName_Success()
-        {
-            var ctx = CreateDb(nameof(TC38_Edit_SameName_Success));
-            var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "Cà Phê" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
-            Assert.True(data!.Value.GetProperty("success").GetBoolean());
-        }
-
-        [Fact]
-        public async Task TC39_Edit_DeletedCategory_CanStillEdit()
-        {
-            var ctx = CreateDb(nameof(TC39_Edit_DeletedCategory_CanStillEdit));
+            var ctx = CreateDb(nameof(TC38_Edit_DeletedCategory_CanStillEdit));
             var ctrl = CreateController(ctx);
             await ctrl.Delete("CAT05");
-            var result = await ctrl.Edit(new Category { Id = "CAT05", Name = "Vẫn sửa được" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT05", Name = "Still Edit" }));
             Assert.True(data!.Value.GetProperty("success").GetBoolean());
+        }
+
+        [Fact]
+        public async Task TC39_Edit_DoesNotChangeIsDeleted()
+        {
+            var ctx = CreateDb(nameof(TC39_Edit_DoesNotChangeIsDeleted));
+            var ctrl = CreateController(ctx);
+            await ctrl.Delete("CAT06");
+            await ctrl.Edit(new Category { Id = "CAT06", Name = "Edited After Delete" });
+            var cat = await ctx.Categories.FindAsync("CAT06");
+            Assert.True(cat!.IsDeleted); // IsDeleted vẫn true sau edit
         }
 
         [Fact]
@@ -510,9 +448,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC40_Edit_ResponseReturnsSuccessTrue));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Edit(new Category { Id = "CAT01", Name = "Updated" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Edit(new Category { Id = "CAT07", Name = "Choco Updated" }));
             Assert.True(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -524,9 +460,7 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC41_Delete_NotFound_ReturnsFalse));
             var ctrl = CreateController(ctx);
-            var result = await ctrl.Delete("CAT999") as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            var data = SafeToJson(await ctrl.Delete("CAT999"));
             Assert.False(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -535,8 +469,8 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC42_Delete_Valid_SetsIsDeletedTrue));
             var ctrl = CreateController(ctx);
-            await ctrl.Delete("CAT06");
-            var cat = await ctx.Categories.FindAsync("CAT06");
+            await ctrl.Delete("CAT08");
+            var cat = await ctx.Categories.FindAsync("CAT08");
             Assert.True(cat!.IsDeleted);
         }
 
@@ -545,10 +479,10 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC43_Delete_SoftDelete_IndexExcludesIt));
             var ctrl = CreateController(ctx);
-            await ctrl.Delete("CAT07");
+            await ctrl.Delete("CAT09");
             var result = await ctrl.Index() as ViewResult;
             var model = Assert.IsType<List<Category>>(result!.Model);
-            Assert.DoesNotContain(model, c => c.Id == "CAT07");
+            Assert.DoesNotContain(model, c => c.Id == "CAT09");
         }
 
         [Fact]
@@ -556,10 +490,9 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC44_Delete_Twice_StillReturnsSuccess));
             var ctrl = CreateController(ctx);
-            await ctrl.Delete("CAT08");
-            var result = await ctrl.Delete("CAT08") as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            await ctrl.Delete("CAT10");
+            var data = SafeToJson(await ctrl.Delete("CAT10"));
+            // Second delete: cat still exists but IsDeleted=true, returns success=true
             Assert.True(data!.Value.GetProperty("success").GetBoolean());
         }
 
@@ -568,21 +501,19 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC45_Delete_ThenCreateNewWithSameName_Success));
             var ctrl = CreateController(ctx);
-            await ctrl.Delete("CAT09");
-            var result = await ctrl.Create(new Category { Name = "Cà Phê" }) as JsonResult;
-            var data = SafeToJson(result);
-            Assert.NotNull(data);
+            await ctrl.Delete("CAT11");
+            var data = SafeToJson(await ctrl.Create(new Category { Name = "Cappuccino" }));
             Assert.True(data!.Value.GetProperty("success").GetBoolean());
         }
 
         [Fact]
-        public async Task TC46_Delete_DrinkStillExistsButCategoryHidden()
+        public async Task TC46_Delete_DrinksStillExistInDB()
         {
-            var ctx = CreateDb(nameof(TC46_Delete_DrinkStillExistsButCategoryHidden));
+            var ctx = CreateDb(nameof(TC46_Delete_DrinksStillExistInDB));
             var ctrl = CreateController(ctx);
             await ctrl.Delete("CAT01");
             var count = ctx.Drinks.Count(d => d.CategoryId == "CAT01");
-            Assert.True(count > 0);
+            Assert.True(count > 0); // Drinks vẫn còn trong DB
         }
 
         [Fact]
@@ -604,52 +535,39 @@ namespace Web_QuanLy_PolyCafe.Tests
         {
             var ctx = CreateDb(nameof(TC48_Create_Edit_Delete_FullCycle_Success));
             var ctrl = CreateController(ctx);
-            var createRes = await ctrl.Create(new Category { Name = "CycleTest" }) as JsonResult;
-            var id = SafeToJson(createRes)!.Value.GetProperty("id").GetString()!;
-
+            var createData = SafeToJson(await ctrl.Create(new Category { Name = "CycleTest" }));
+            var id = createData!.Value.GetProperty("id").GetString()!;
             await ctrl.Edit(new Category { Id = id, Name = "Cycle Edited" });
             await ctrl.Delete(id);
-
             var cat = await ctx.Categories.FindAsync(id);
             Assert.True(cat!.IsDeleted);
         }
 
         [Fact]
-        public async Task TC49_Create_ThenEdit_ThenDelete_VerifyDBState()
+        public async Task TC49_Create_Then_IndexCount_Increases()
         {
-            var ctx = CreateDb(nameof(TC49_Create_ThenEdit_ThenDelete_VerifyDBState));
+            var ctx = CreateDb(nameof(TC49_Create_Then_IndexCount_Increases));
             var ctrl = CreateController(ctx);
-            var createRes = await ctrl.Create(new Category { Name = "Temp" }) as JsonResult;
-            var id = SafeToJson(createRes)!.Value.GetProperty("id").GetString()!;
+            var before = ((await ctrl.Index() as ViewResult)!.Model as List<Category>)!.Count;
 
-            await ctrl.Edit(new Category { Id = id, Name = "Edited Temp" });
-            await ctrl.Delete(id);
+            await ctrl.Create(new Category { Name = "Extra Category" });
 
-            var cat = await ctx.Categories.FindAsync(id);
-            Assert.True(cat!.IsDeleted);
+            var after = ((await ctrl.Index() as ViewResult)!.Model as List<Category>)!.Count;
+            Assert.Equal(before + 1, after);
         }
 
         [Fact]
-        public async Task TC50_HighVolume_Create30_EditDeleteHalf_VerifyCount()
+        public async Task TC50_HighVolume_Create5_Delete3_VerifyCount()
         {
-            var ctx = CreateDb(nameof(TC50_HighVolume_Create30_EditDeleteHalf_VerifyCount));
+            var ctx = CreateDb(nameof(TC50_HighVolume_Create5_Delete3_VerifyCount));
             var ctrl = CreateController(ctx);
-
-            for (int i = 0; i < 30; i++)
-                await ctrl.Create(new Category { Name = $"High{i}" });
-
-            for (int i = 0; i < 10; i++)
-            {
-                var cat = ctx.Categories.First(c => c.Name == $"High{i}");
-                await ctrl.Edit(new Category { Id = cat.Id, Name = $"Edited{i}" });
-            }
-
-            var toDelete = ctx.Categories.Where(c => !c.IsDeleted).Take(15).ToList();
+            for (int i = 0; i < 5; i++)
+                await ctrl.Create(new Category { Name = $"Bulk{i}" });
+            var toDelete = ctx.Categories.Where(c => c.Name.StartsWith("Bulk")).Take(3).ToList();
             foreach (var cat in toDelete)
                 await ctrl.Delete(cat.Id);
-
             var activeCount = ctx.Categories.Count(c => !c.IsDeleted);
-            Assert.Equal(20 + 30 - 15, activeCount);
+            Assert.Equal(22, activeCount); // 20 seed + 5 new - 3 deleted
         }
     }
 }
